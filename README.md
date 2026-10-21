@@ -3,7 +3,7 @@
 
 # Lazarus
 
-**Skeleton for small Windows tray apps: one exe, RU/EN, light and dark, releases from CI.**
+**Ctrl+Shift+T for your whole desktop: bring back the folder, terminal or app you just closed, right where it was.**
 
 **English** · [Русский](README.ru.md)
 
@@ -15,23 +15,23 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/main-dark-en.png">
-  <img src="docs/main-light-en.png" width="820" alt="Lazarus main window">
+  <img src="docs/main-light-en.png" width="820" alt="Lazarus journal of closed windows">
 </picture>
 </div>
 
-
 ## Why
 
-Every small Windows utility needs the same boring parts: a tray icon, settings, autostart, two languages, a crash log and a release with checksums.
-Lazarus has them done once, so an app only adds its own pages.
+You close an Explorer window with five folders deep, or a Windows Terminal with three tabs in three projects, and a second later you need it back.
+Browsers have Ctrl+Shift+T for that; Windows does not. Lazarus adds it: one key brings the window back to the same folder, tabs, monitor and size.
 
 ## Features
 
-- **Tray first** — left click opens the window, the cross hides it, Exit is in the tray menu.
-- **One exe** — no installer and no admin rights; a Start menu shortcut and autostart are switches in Settings.
-- **English and Russian, light and dark** — follows Windows or your choice.
-- **Honest updates** — once a day it asks GitHub about a new release, shows a note and downloads nothing.
-- **Crash log** — if it fails, it stops and shows where the log is; nothing is sent anywhere.
+- **One key** — `Ctrl+Shift+Win+T` brings back the last closed window, each next press the one before it. `Ctrl+Shift+T` works too while Explorer, the desktop or the taskbar is in front.
+- **Explorer folders** — the same path, special folders like This PC included, on the same spot of the same monitor; the other tabs of the window are one click away.
+- **Windows Terminal with all its tabs** — every tab comes back with its profile and working folder.
+- **Apps in place** — programs return to the same monitor, size and position, even those that don't remember it themselves.
+- **Safe** — commands typed in a terminal are never run again, and anything risky (console commands, admin windows, links or tokens in arguments) asks first.
+- **Local** — no admin rights, no telemetry; the journal stays in `%APPDATA%\Lazarus`.
 
 ## See it in action
 
@@ -42,7 +42,20 @@ Lazarus has them done once, so an app only adds its own pages.
 | | Light | Dark |
 |---|---|---|
 | Settings | ![Settings, light](docs/settings-light-en.png) | ![Settings, dark](docs/settings-dark-en.png) |
-| About | ![About, light](docs/about-light-en.png) | ![About, dark](docs/about-dark-en.png) |
+| Asks first | ![Confirmation, light](docs/confirm-light-en.png) | ![Confirmation, dark](docs/confirm-dark-en.png) |
+
+## How it works
+
+Once a window is closed, Windows forgets its folder, its tabs and the command that started it: there is nothing left to ask. So Lazarus looks at open windows once a second and keeps a note for each: the program and its command line, position and monitor, Explorer's tab paths, and for every Terminal tab its profile and folder.
+When a window disappears and its program really exits (not just hides in the tray), the note becomes a journal entry. The hotkey starts the program again with the same arguments and puts its new window where the old one was.
+Lazarus brings back windows, not what was inside them: the tabs of your browser or an SSH session are the program's own business. A shell comes back in its folder; the commands you ran in it are not repeated.
+
+**PowerShell folder.** `Set-Location` doesn't change the folder Windows sees, so pwsh would come back in its start folder.
+Add one line to your `$PROFILE` (Settings → PowerShell folder → Copy) and Lazarus knows the real one; it only copies the line, it never edits your profile:
+
+```powershell
+$ExecutionContext.InvokeCommand.LocationChangedAction = { param($s, $e) if ($e.NewPath.Provider.Name -eq 'FileSystem') { $env:LAZARUS_CWD = $e.NewPath.ProviderPath } }
+```
 
 ## Download
 
@@ -55,19 +68,21 @@ Requirements: Windows 11 x64. Windows 10 22H2 should work but is not tested.
 ## First run
 
 Put the exe into a permanent folder first, for example `%LOCALAPPDATA%\Programs\Lazarus\`: autostart and the shortcut point to it.
-On the first start Windows may show a SmartScreen warning (see FAQ). The app then lives in the tray; turn on **Start with Windows** in Settings.
+On the first start Windows may show a SmartScreen warning (see FAQ). Lazarus then lives in the tray; turn on **Start with Windows** in Settings, since it can only bring back windows it saw open.
 
 ## Settings
 
 | Setting | Default | What it does |
 |---|---|---|
-| Language | Windows language | English or Russian, applied after a restart |
-| Theme | Windows theme | Light or dark |
-| Start with Windows | off | Starts minimized to the tray |
-| Start menu shortcut | on when the exe is in `%LOCALAPPDATA%\Programs\Lazarus\` | A shortcut in the Start menu |
-| Check for updates | on | Once a day asks GitHub about a new release |
+| Restore the last closed window | `Ctrl+Shift+Win+T` | The global hotkey; "taken by another program" shows if it's busy |
+| Ctrl+Shift+T in Explorer and on the desktop | on | Only while Explorer, the desktop or the taskbar is in front, so browsers keep theirs |
+| Entries / days to keep | 30 / 7 | Size and age limit of the journal |
+| Keep the journal between restarts | on | Off: the journal lives in memory only |
+| Don't remember | empty | Exe names or path masks, on top of the built-in list (installers, Temp, Steam and Epic games) |
+| Start without asking | empty | Programs you ticked "Don't ask again" for |
+| Language, theme, Start with Windows, Start menu shortcut, check for updates | | As in every app of the set |
 
-Settings and logs live in `%APPDATA%\Lazarus`.
+Settings, the journal and logs live in `%APPDATA%\Lazarus`.
 
 ## FAQ
 
@@ -80,8 +95,27 @@ Smart App Control, if it is on, blocks unsigned files with no way to allow one; 
 
 <details><summary>My antivirus flags it</summary>
 
-It is a false positive: the app has no installer, no packer and no obfuscation. Please report it to your antivirus vendor
-and open an issue with the detection name and the SHA256 of the file.
+Lazarus lists windows and processes, reads the folder of shell processes (cmd, pwsh, bash) from their memory, registers a global hotkey and starts programs: that can look like spyware to a heuristic.
+There are no keyboard hooks, no code injection and no network beyond the update check; the code is all here. Please report the false positive to your antivirus vendor and open an issue with the detection name and the SHA256 of the file.
+</details>
+
+<details><summary>I closed a program and it is not in the journal</summary>
+
+An entry appears only when the program actually exits within 15 seconds. Programs that go to the tray (Telegram, Discord) or keep another window open are still running, so there is nothing to bring back.
+Windows that lived less than 3 seconds, installers, games and programs from your "Don't remember" list are skipped too.
+</details>
+
+<details><summary>Does it work with games and anti-cheat?</summary>
+
+Games in any Steam library (`*\steamapps\common\*`) and in `*\Epic Games\*` are excluded: Lazarus reads only their path and opens nothing else. Add a game in another folder to "Don't remember".
+The global hotkey has three modifiers, and `Ctrl+Shift+T` only works with Explorer, the desktop or the taskbar in front, so a game never loses focus by accident.
+</details>
+
+<details><summary>What about admin windows, WSL and virtual desktops?</summary>
+
+A window that ran as administrator comes back only after you confirm, through the UAC prompt, and Windows does not let Lazarus move it.
+A WSL tab opens in its profile's folder (a Linux path is out of reach from Windows). Windows open on the current virtual desktop.
+Windows PowerShell 5.1 has no hook for its folder; tabs of pwsh 7 come back in the right one.
 </details>
 
 <details><summary>How do I uninstall?</summary>
@@ -92,7 +126,8 @@ About → **Remove data and autostart**, then delete the exe.
 ## Privacy
 
 No telemetry. The only network request is the update check: `GET https://api.github.com/repos/lojekq/Lazarus/releases/latest` once a day; turn it off in Settings.
-Logs contain no window titles, paths or other personal data.
+The journal (window titles, paths, command lines) stays on this PC in `%APPDATA%\Lazarus\journal.json`; turn off "Keep the journal between restarts" to keep it in memory only, or clear it.
+InPrivate and incognito windows are saved under the program name, not their title. Logs contain no window titles, paths or command lines.
 
 ## Build from source
 

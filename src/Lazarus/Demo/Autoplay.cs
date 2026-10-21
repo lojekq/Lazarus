@@ -1,22 +1,27 @@
 using System.Windows.Threading;
 using Lazarus.Features;
-using Lazarus.Shell;
 
 namespace Lazarus.Demo;
 
-/// <summary>--autoplay: a 6–8 s scenario for gif.ps1 (DispatcherTimer + list of steps). The app spec defines its own steps.</summary>
+/// <summary>
+/// --demo --autoplay: 8 s on the journal for the window GIF (gif.ps1). The scene GIF with real Explorer and Terminal windows is
+/// <see cref="Scene"/> (--autoplay without --demo, in the owner's slot).
+/// </summary>
 public static class Autoplay
 {
     public static void Start(MainWindow w)
     {
         // Seconds after the window is on screen; gif.ps1 starts recording when --rect-file appears, ffmpeg needs ~1 s
+        var p = () => JournalPage.Current;
         (double At, Action Do)[] steps =
         [
-            (2.0, () => MainPage.Items.Add(new(Loc.T("Demo.Backup"), @"D:\Backup\demo", false))),
-            (3.0, () => MainPage.Items[^1].On = true),
-            (4.0, () => MainPage.Items[2].On = true),
-            (5.5, () => w.Navigate("settings")),
-            (7.0, () => w.Navigate("main")),
+            (1.6, () => p()?.Type("p")), (1.8, () => p()?.Type("pi")), (2.0, () => p()?.Type("pin")), (2.2, () => p()?.Type("ping")),
+            (3.6, () => p()?.Type("")),
+            (4.2, () => p()?.Select(1)),
+            (5.0, () => p()?.ShowMenu(true)),
+            (6.6, () => p()?.ShowMenu(false)),
+            (6.8, () => w.Navigate("settings")),
+            (8.4, () => w.Navigate("main")),
         ];
         var started = DateTime.UtcNow;
         var next = 0;

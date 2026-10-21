@@ -1,0 +1,96 @@
+<Page x:Class="Lazarus.Features.JournalPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:l="clr-namespace:Lazarus.Shell"
+      xmlns:f="clr-namespace:Lazarus.Features">
+    <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="Vis" />
+        <Style x:Key="Badge" TargetType="Border">
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Padding" Value="6,1" />
+            <Setter Property="Margin" Value="6,0,0,0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Background" Value="{DynamicResource ControlFillColorSecondaryBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+    </Page.Resources>
+    <Grid Margin="24,12,24,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <ui:TextBlock FontTypography="Title" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Text="{l:T Page.Main}" />
+
+        <Grid Grid.Row="1" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <ui:TextBox x:Name="Search" PlaceholderText="{l:T Journal.Search}" Icon="{ui:SymbolIcon Search24}" />
+            <ui:Button x:Name="RestoreButton" Grid.Column="1" Appearance="Primary" Margin="8,0,0,0" Icon="{ui:SymbolIcon ArrowUndo24}" VerticalAlignment="Stretch">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{l:T Journal.RestoreLast}" />
+                    <TextBlock x:Name="HotkeyHint" Margin="8,0,0,0" Opacity="0.75" />
+                </StackPanel>
+            </ui:Button>
+        </Grid>
+
+        <ui:TextBlock x:Name="Status" Grid.Row="2" Margin="2,8,0,8" FontTypography="Caption" Appearance="Secondary" />
+
+        <ui:ListView x:Name="List" Grid.Row="3" SelectionMode="Single" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ui:ListView.ContextMenu>
+                <ContextMenu x:Name="Menu">
+                    <MenuItem x:Name="MenuRestore" Header="{l:T Menu.Restore}" Icon="{ui:SymbolIcon ArrowUndo20}" />
+                    <MenuItem x:Name="MenuOpenAll" Header="{l:T Menu.OpenAll}" Icon="{ui:SymbolIcon FolderOpen20}" />
+                    <MenuItem x:Name="MenuCopy" Header="{l:T Menu.CopyCommand}" Icon="{ui:SymbolIcon Copy20}" />
+                    <MenuItem x:Name="MenuFolder" Header="{l:T Menu.OpenFolder}" Icon="{ui:SymbolIcon Folder20}" />
+                    <Separator />
+                    <MenuItem x:Name="MenuExclude" Header="{l:T Menu.Exclude}" Icon="{ui:SymbolIcon EyeOff20}" />
+                    <MenuItem x:Name="MenuDelete" Header="{l:T Menu.Delete}" Icon="{ui:SymbolIcon Delete20}" InputGestureText="Del" />
+                </ContextMenu>
+            </ui:ListView.ContextMenu>
+            <ui:ListView.ItemTemplate>
+                <DataTemplate DataType="{x:Type f:EntryView}">
+                    <Grid Margin="4,3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="40" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:SymbolIcon Symbol="{Binding Glyph}" FontSize="22" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                       Visibility="{Binding NoIcon, Converter={StaticResource Vis}}"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <Image Source="{Binding Icon}" Width="20" Height="20" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="1,0,0,0" />
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
+                            <ui:TextBlock Text="{Binding Title}" FontTypography="BodyStrong" TextTrimming="CharacterEllipsis" />
+                            <ui:TextBlock Text="{Binding Detail}" FontTypography="Caption" Appearance="Secondary" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Style="{StaticResource Badge}" Visibility="{Binding Admin, Converter={StaticResource Vis}}">
+                                <TextBlock Text="{l:T Badge.Admin}" FontSize="11" Foreground="{DynamicResource SystemFillColorCautionBrush}" />
+                            </Border>
+                            <Border Style="{StaticResource Badge}" Visibility="{Binding AsksFirst, Converter={StaticResource Vis}}">
+                                <TextBlock Text="{l:T Badge.Confirm}" FontSize="11" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                            </Border>
+                            <Border Style="{StaticResource Badge}" Visibility="{Binding Unavailable, Converter={StaticResource Vis}}">
+                                <TextBlock Text="{l:T Badge.Unavailable}" FontSize="11" Foreground="{DynamicResource SystemFillColorCriticalBrush}" />
+                            </Border>
+                        </StackPanel>
+                        <StackPanel Grid.Column="3" VerticalAlignment="Center" MinWidth="96" Margin="12,0,4,0">
+                            <ui:TextBlock Text="{Binding Time}" FontTypography="Caption" HorizontalAlignment="Right" />
+                            <ui:TextBlock Text="{Binding Monitor}" FontTypography="Caption" Appearance="Tertiary" HorizontalAlignment="Right" />
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ui:ListView.ItemTemplate>
+        </ui:ListView>
+
+        <ui:TextBlock x:Name="EmptyText" Grid.Row="3" Appearance="Tertiary" TextWrapping="Wrap" Margin="2,8,0,0" />
+    </Grid>
+</Page>

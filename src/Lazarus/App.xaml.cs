@@ -34,12 +34,11 @@ public partial class App : Application
         Loc.Apply(Settings.Current.Language);
         Log.Info($"start {AppInfo.Version}{(a.Unknown.Count > 0 ? $", {a.Unknown.Count} unknown argument(s)" : "")}");
 
-        if (a.Demo) DemoData.Fill();
-        else if (Install.IsInstalled) InstalledStart(); // Debug builds and exes in Downloads write nothing by themselves
+        if (!a.Demo && Install.IsInstalled) InstalledStart(); // Debug builds and exes in Downloads write nothing by themselves
 
-        // App features: services, hotkeys, tray items, settings section (template sample below)
-        SettingsPage.AppSection = SampleSettings.Create;
-        SampleSettings.Apply();
+        Engine.Start(); // --demo: the made-up journal only
+        if (a.Autoplay && !a.Demo) _ = Scene.Run(new(1080, 344, 1280, 720)); // tools/scene.ps1: centre of DISPLAY1
+        SettingsPage.AppSection = () => new SettingsSection();
 
         window = new MainWindow();
         if (a.Width > 0) (window.Width, window.Height) = (a.Width, a.Height);
@@ -54,9 +53,9 @@ public partial class App : Application
             Settings.Save();
             Tray.Notify(AppInfo.DisplayName, Loc.T("Tray.Hidden"));
         };
-        Capture.Attach(window, () => { if (a.Autoplay) Autoplay.Start(window); });
+        Capture.Attach(window, () => { if (a.Autoplay && a.Demo) Autoplay.Start(window); });
 
-        if (a.Screenshot is null) Tray.Create(ShowMain, () => Quit());
+        if (a.Screenshot is null) Tray.Create(ShowMain, () => Quit(), Engine.TrayItems());
         SessionEnding += (_, _) => RaiseExiting();
         Updates.Found += (version, url) =>
         {
@@ -68,7 +67,15 @@ public partial class App : Application
         };
         Updates.Start();
 
-        if (!a.Background) ShowMain(a.Page);
+        if (a.Demo && a.Page == "confirm") ShowConfirm(); // the dialog alone, for its screenshot
+        else if (!a.Background) ShowMain(a.Page);
+    }
+
+    static void ShowConfirm()
+    {
+        var d = new ConfirmDialog(DemoData.Confirm(Engine.Journal), [RiskClassifier.Console]);
+        Capture.Attach(d, () => { });
+        d.Show();
     }
 
     public static void ShowMain(string? page)
