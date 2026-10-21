@@ -58,21 +58,23 @@ public class PebTests
     }
 
     /// <summary>
-    /// The settings one-liner: Set-Location leaves the process directory alone, $env:LAZARUS_CWD lands in the PEB.
-    /// pwsh 7 only: Windows PowerShell 5.1 has no LocationChangedAction (NativeFacts).
+    /// The profile block in Windows PowerShell 5.1 and pwsh 7: after Set-Location the next prompt moves the process folder
+    /// (what the PEB shows), the shell is marked as hooked, and running the profile twice wraps the prompt once.
+    /// The prompt is called by hand: with redirected input PowerShell does not draw one.
     /// </summary>
     [TestMethod]
-    public void PowerShellHookWritesLazarusCwd()
+    [DataRow("powershell.exe")]
+    [DataRow("pwsh.exe")]
+    public void PowerShellHookMovesTheProcessFolder(string shell)
     {
-        if (!File.Exists(@"C:\Program Files\PowerShell\7\pwsh.exe")) Assert.Inconclusive("no pwsh");
+        if (shell == "pwsh.exe" && !File.Exists(@"C:\Program Files\PowerShell\7\pwsh.exe")) Assert.Inconclusive("no pwsh");
         var dir = Path.GetTempPath().TrimEnd('\\');
-        using var p = StartShell("pwsh.exe","-NoLogo", "-NoProfile", "-NonInteractive", "-NoExit", "-Command",
-            PowerShellHook.Line + $"; Set-Location -LiteralPath '{dir}'");
+        using var p = StartShell(shell, "-NoLogo", "-NoProfile", "-NonInteractive", "-NoExit", "-Command",
+            "function prompt { 'MINE> ' }\r\n" + // the user's own prompt comes first in a real profile
+            $"{PowerShellHook.Block}\r\n{PowerShellHook.Block}\r\nSet-Location -LiteralPath '{dir}'; if ((prompt) -ne 'MINE> ') {{ exit 3 }}");
         try
         {
-            var s = Wait(p, s => s.LazarusCwd is not null);
-            Assert.AreEqual(dir, s.LazarusCwd, ignoreCase: true);
-            Assert.AreNotEqual(dir, s.Cwd, ignoreCase: true, "Set-Location must not move the process directory");
+            Wait(p, s => s.Hooked && string.Equals(s.Cwd, dir, StringComparison.OrdinalIgnoreCase)); // fails with the last state
         }
         finally { p.Kill(); }
     }

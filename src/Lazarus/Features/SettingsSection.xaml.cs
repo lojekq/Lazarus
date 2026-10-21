@@ -50,11 +50,11 @@ public partial class SettingsSection
         };
         RefreshLists();
 
-        HookBox.Text = PowerShellHook.Line;
-        CopyButton.Click += (_, _) => Clipboard.SetText(PowerShellHook.Line);
-        Loaded += (_, _) =>
+        ConnectButton.Click += async (_, _) => await ChangeHook(connect: true);
+        DisconnectButton.Click += async (_, _) => await ChangeHook(connect: false);
+        Loaded += async (_, _) =>
         {
-            PwshStatus.Text = PwshHookStatus();
+            await RefreshHook();
             // The README screenshot shows Lazarus' own block, not the shell's language and theme
             if (Args.Current.Screenshot is not null)
                 Dispatcher.BeginInvoke(() =>
@@ -106,12 +106,45 @@ public partial class SettingsSection
         return g;
     }
 
-    /// <summary>"Hook found in 2 of 3 open pwsh": LAZARUS_CWD in each pwsh's environment.</summary>
-    static string PwshHookStatus()
+    /// <summary>"Windows PowerShell 5.1: connected · PowerShell 7: not connected · open windows with it: 2", and the policy note.</summary>
+    async Task RefreshHook()
     {
-        if (Args.Current.Demo) return string.Format(Loc.T("Set.Pwsh.Status"), 2, 3);
-        var pids = Process.GetProcessesByName("pwsh").Select(p => { using (p) return p.Id; }).ToList();
-        if (pids.Count == 0) return Loc.T("Set.Pwsh.None");
-        return string.Format(Loc.T("Set.Pwsh.Status"), pids.Count(pid => Peb.Read(pid)?.LazarusCwd is not null), pids.Count);
+        if (Args.Current.Demo)
+        {
+            PwshStatus.Text = $"Windows PowerShell 5.1: {Loc.T("Set.Pwsh.On")} · PowerShell 7: {Loc.T("Set.Pwsh.On")} · {string.Format(Loc.T("Set.Pwsh.Running"), 2)}";
+            return;
+        }
+        PwshStatus.Text = Loc.T("Set.Pwsh.Checking");
+        ConnectButton.IsEnabled = DisconnectButton.IsEnabled = false;
+        var hosts = await PowerShellHook.FindAsync();
+        var (connected, running) = await Task.Run(() => (
+            hosts.Select(h => PowerShellHook.IsConnected(h.Profile)).ToList(),
+            // Shells running the hook: LAZARUS_HOOK (or the 1.0 one-liner's LAZARUS_CWD) in their environment
+            new[] { "powershell", "pwsh" }.SelectMany(Process.GetProcessesByName).Count(p => { using (p) return Peb.Read(p.Id)?.Hooked == true; })));
+        if (hosts.Count == 0) { PwshStatus.Text = Loc.T("Set.Pwsh.None"); return; }
+        PwshStatus.Text = string.Join(" · ", hosts.Select((h, i) =>
+            $"{h.Name}: {(h.PolicyBlocks ? string.Format(Loc.T("Set.Pwsh.Blocked"), h.Policy) : Loc.T(connected[i] ? "Set.Pwsh.On" : "Set.Pwsh.Off"))}")
+            .Append(string.Format(Loc.T("Set.Pwsh.Running"), running)));
+        PwshPolicy.Text = Loc.T("Set.Pwsh.PolicyNote");
+        PwshPolicy.Visibility = hosts.Any(h => h.PolicyBlocks) ? Visibility.Visible : Visibility.Collapsed;
+        ConnectButton.IsEnabled = hosts.Where((h, i) => !h.PolicyBlocks && !connected[i]).Any();
+        DisconnectButton.IsEnabled = connected.Any(c => c);
+    }
+
+    /// <summary>Connect writes the block into each PowerShell whose policy loads profiles; Disconnect takes it out of all of them.</summary>
+    async Task ChangeHook(bool connect)
+    {
+        if (Args.Current.Demo) return;
+        ConnectButton.IsEnabled = DisconnectButton.IsEnabled = false;
+        var hosts = await PowerShellHook.FindAsync();
+        var error = await Task.Run(() =>
+        {
+            foreach (var h in hosts.Where(h => !connect || !h.PolicyBlocks))
+                try { PowerShellHook.Edit(h.Profile, connect); }
+                catch (Exception e) { Log.Warn("PowerShell profile not changed", e); return e.Message; }
+            return null;
+        });
+        await RefreshHook();
+        if (error is not null) { PwshPolicy.Text = error; PwshPolicy.Visibility = Visibility.Visible; }
     }
 }

@@ -6,7 +6,7 @@ using Wdk = Windows.Wdk;
 namespace Lazarus.Features;
 
 /// <summary>What a shell's PEB says: current directory and the variables Lazarus needs.</summary>
-public sealed record ShellState(string? Cwd, string? LazarusCwd, string? WtSession, string? WtProfile);
+public sealed record ShellState(string? Cwd, string? LazarusCwd, string? WtSession, string? WtProfile, bool Hooked = false);
 
 /// <summary>
 /// Reads the current directory and environment of a 64-bit shell from its PEB (undocumented, offsets in <see cref="NativeFacts"/>).
@@ -35,7 +35,8 @@ public static unsafe class Peb
             var envAt = ReadPtr(handle, p + NativeFacts.ParamsEnvironment);
             var envSize = (long)ReadPtr(handle, p + NativeFacts.ParamsEnvironmentSize);
             var env = envAt == 0 ? [] : ParseEnvironment(ReadChars(handle, envAt, (int)Math.Clamp(envSize, 0, NativeFacts.MaxEnvironmentBytes) / 2));
-            return new(TrimSlash(cwd), TrimSlash(env.GetValueOrDefault("LAZARUS_CWD")), env.GetValueOrDefault("WT_SESSION"), env.GetValueOrDefault("WT_PROFILE_ID"));
+            return new(TrimSlash(cwd), TrimSlash(env.GetValueOrDefault("LAZARUS_CWD")), env.GetValueOrDefault("WT_SESSION"), env.GetValueOrDefault("WT_PROFILE_ID"),
+                env.ContainsKey("LAZARUS_HOOK") || env.ContainsKey("LAZARUS_CWD")); // PowerShellHook, or the 1.0 one-liner
         }
         catch { return null; }
     }

@@ -144,10 +144,8 @@
   <data name="Set.Trusted.Empty" xml:space="preserve"><value>Пока нет: отметьте «Больше не спрашивать» в диалоге подтверждения.</value></data>
   <data name="Set.Remove" xml:space="preserve"><value>Убрать</value></data>
   <data name="Set.Pwsh" xml:space="preserve"><value>Папка PowerShell</value></data>
-  <data name="Set.Pwsh.Note" xml:space="preserve"><value>pwsh не сообщает Windows свою папку. Добавьте эту строку в $PROFILE (notepad $PROFILE), и вкладки будут возвращаться в нужную папку. Строка заменит ваш LocationChangedAction, если он есть. Windows PowerShell 5.1 не поддерживается.</value></data>
-  <data name="Set.Pwsh.Status" xml:space="preserve"><value>Хук найден в {0} из {1} открытых pwsh</value></data>
-  <data name="Set.Pwsh.None" xml:space="preserve"><value>Сейчас нет открытых pwsh</value></data>
-  <data name="Set.Copy" xml:space="preserve"><value>Копировать</value></data>
+  <data name="Set.Pwsh.Note" xml:space="preserve"><value>PowerShell не сообщает Windows свою папку, поэтому закрытая вкладка вернулась бы в стартовую. «Подключить» дописывает короткий помеченный блок в конец вашего профиля Windows PowerShell 5.1 и PowerShell 7 (сначала копия .bak): перед каждым приглашением он переводит шелл в его текущую папку и не меняет ваш prompt. Действует в новых окнах; «Отключить» удаляет только этот блок.</value></data>
+  <data name="Set.Pwsh.None" xml:space="preserve"><value>PowerShell не найден</value></data>
   <data name="Demo.Notepad" xml:space="preserve"><value>notes.txt — Блокнот</value></data>
   <data name="Demo.Downloads" xml:space="preserve"><value>Загрузки</value></data>
   <data name="Demo.Admin" xml:space="preserve"><value>Администратор: C:\Windows\System32\cmd.exe</value></data>
@@ -155,4 +153,12 @@
   <data name="Group.One" xml:space="preserve"><value>{0} окно</value></data>
   <data name="Group.Few" xml:space="preserve"><value>{0} окна</value></data>
   <data name="Group.Many" xml:space="preserve"><value>{0} окон</value></data>
+  <data name="Set.Pwsh.Connect" xml:space="preserve"><value>Подключить PowerShell</value></data>
+  <data name="Set.Pwsh.Disconnect" xml:space="preserve"><value>Отключить</value></data>
+  <data name="Set.Pwsh.Checking" xml:space="preserve"><value>Проверяю PowerShell…</value></data>
+  <data name="Set.Pwsh.On" xml:space="preserve"><value>подключено</value></data>
+  <data name="Set.Pwsh.Off" xml:space="preserve"><value>не подключено</value></data>
+  <data name="Set.Pwsh.Blocked" xml:space="preserve"><value>профили выключены (политика выполнения {0})</value></data>
+  <data name="Set.Pwsh.Running" xml:space="preserve"><value>открытых окон с ним: {0}</value></data>
+  <data name="Set.Pwsh.PolicyNote" xml:space="preserve"><value>PowerShell с политикой выполнения Restricted или AllSigned не загружает профили, поэтому Lazarus его не трогает. Чтобы разрешить свой профиль, выполните в нём: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned. Сам Lazarus политику не меняет.</value></data>
 </root>

@@ -29,7 +29,13 @@ public partial class App : Application
         base.OnStartup(e);
         var a = Args.Current;
         Crash.Install(this);
-        // Settings and the language are loaded in Program.Main (see there). Lazarus registers nothing outside its data folder, so App.RemoveData stays null; services start below the installer
+        // Settings and the language are loaded in Program.Main (see there). Uninstall and "Remove data" take the PowerShell block
+        // out of the profiles (the only thing Lazarus writes outside its data folder); services start below the installer
+        RemoveData = () =>
+        {
+            if (!Args.Current.Demo) PowerShellHook.DisconnectAll();
+            return null;
+        };
         if (await Installer.HandleAsync()) // install, update, switch to the installed copy or uninstall: this process is done
         {
             Shutdown();

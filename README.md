@@ -51,12 +51,9 @@ Once a window is closed, Windows forgets its folder, its tabs and the command th
 When a window disappears and its program really exits (not just hides in the tray), the note becomes a journal entry. The hotkey starts the program again with the same arguments and puts its new window where the old one was.
 Lazarus brings back windows, not what was inside them: the tabs of your browser or an SSH session are the program's own business. A shell comes back in its folder; the commands you ran in it are not repeated.
 
-**PowerShell folder.** `Set-Location` doesn't change the folder Windows sees, so pwsh would come back in its start folder.
-Add one line to your `$PROFILE` (Settings → PowerShell folder → Copy) and Lazarus knows the real one; it only copies the line, it never edits your profile:
-
-```powershell
-$ExecutionContext.InvokeCommand.LocationChangedAction = { param($s, $e) if ($e.NewPath.Provider.Name -eq 'FileSystem') { $env:LAZARUS_CWD = $e.NewPath.ProviderPath } }
-```
+**PowerShell folder.** `cd` in PowerShell doesn't change the folder Windows sees, so a PowerShell tab would come back in its start folder.
+Press **Settings → PowerShell folder → Connect PowerShell** once. Lazarus adds a short marked block to the end of your profile in Windows PowerShell 5.1 and PowerShell 7 (a `.bak` copy first): before each prompt it moves the shell to its current folder and keeps your prompt as it is.
+New windows pick it up. **Disconnect**, and uninstalling Lazarus, remove only that block. A PowerShell whose execution policy doesn't load profiles (Restricted, AllSigned) is left alone, and the settings say why.
 
 ## Download
 
@@ -120,7 +117,7 @@ The global hotkey has three modifiers, and `Ctrl+Shift+T` only works with Explor
 A window that ran as administrator comes back only after you confirm, through the UAC prompt, and Windows does not let Lazarus move it.
 A WSL tab opens in its profile's folder (a Linux path is out of reach from Windows). Windows open on the current virtual desktop.
 A Terminal tab that a console program opened by itself (started outside Terminal and handed over to it) can't be told apart from other consoles and is not remembered.
-Windows PowerShell 5.1 has no hook for its folder; tabs of pwsh 7 come back in the right one.
+PowerShell tabs, 5.1 and 7, come back in the right folder once PowerShell is connected in Settings.
 </details>
 
 <details><summary>How do I uninstall?</summary>

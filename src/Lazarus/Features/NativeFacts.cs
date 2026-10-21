@@ -18,8 +18,9 @@ public static class NativeFacts
     /// <summary>A sane cap for a shell's environment block.</summary>
     public const int MaxEnvironmentBytes = 1 << 20;
 
-    // Windows PowerShell 5.1 has no $ExecutionContext.InvokeCommand.LocationChangedAction ("property not found"):
-    // the hook works in pwsh 7 only; a 5.1 tab comes back in its start folder.
+    // Windows PowerShell 5.1 has no $ExecutionContext.InvokeCommand.LocationChangedAction ("property not found"). So since 1.0.2
+    // the hook wraps the prompt function and sets [Environment]::CurrentDirectory, the process folder the PEB shows: it works in
+    // 5.1 and 7 (PebTests), keeps the user's prompt and needs no LocationChangedAction. LAZARUS_CWD of the 1.0 one-liner is still read.
 
     // Elevated processes, seen from a normal one: PROCESS_QUERY_LIMITED_INFORMATION opens them, so the exe path and the command line
     // (NtQueryInformationProcess class 60) are read; the PEB is not (no PROCESS_VM_READ), so no folder and no WT profile.

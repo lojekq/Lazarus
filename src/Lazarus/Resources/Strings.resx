@@ -144,10 +144,8 @@ The program, its Start menu shortcut, autostart and the entry in Settings → Ap
   <data name="Set.Trusted.Empty" xml:space="preserve"><value>None yet: tick "Don't ask again" in the confirmation dialog.</value></data>
   <data name="Set.Remove" xml:space="preserve"><value>Remove</value></data>
   <data name="Set.Pwsh" xml:space="preserve"><value>PowerShell folder</value></data>
-  <data name="Set.Pwsh.Note" xml:space="preserve"><value>pwsh does not tell Windows its folder. Add this line to $PROFILE (notepad $PROFILE) and closed tabs come back in the right folder. It replaces your own LocationChangedAction, if you have one. Windows PowerShell 5.1 is not supported.</value></data>
-  <data name="Set.Pwsh.Status" xml:space="preserve"><value>Hook found in {0} of {1} open pwsh</value></data>
-  <data name="Set.Pwsh.None" xml:space="preserve"><value>No pwsh is open now</value></data>
-  <data name="Set.Copy" xml:space="preserve"><value>Copy</value></data>
+  <data name="Set.Pwsh.Note" xml:space="preserve"><value>PowerShell does not tell Windows its folder, so a closed tab would come back in its start folder. Connect adds a short marked block to the end of your profile in Windows PowerShell 5.1 and PowerShell 7 (a .bak copy first): before each prompt it moves the shell to its current folder and keeps your prompt as it is. New windows pick it up; Disconnect removes only that block.</value></data>
+  <data name="Set.Pwsh.None" xml:space="preserve"><value>PowerShell is not found</value></data>
   <data name="Demo.Notepad" xml:space="preserve"><value>notes.txt - Notepad</value></data>
   <data name="Demo.Downloads" xml:space="preserve"><value>Downloads</value></data>
   <data name="Demo.Admin" xml:space="preserve"><value>Administrator: C:\Windows\System32\cmd.exe</value></data>
@@ -155,4 +153,12 @@ The program, its Start menu shortcut, autostart and the entry in Settings → Ap
   <data name="Group.One" xml:space="preserve"><value>{0} window</value></data>
   <data name="Group.Few" xml:space="preserve"><value>{0} windows</value></data>
   <data name="Group.Many" xml:space="preserve"><value>{0} windows</value></data>
+  <data name="Set.Pwsh.Connect" xml:space="preserve"><value>Connect PowerShell</value></data>
+  <data name="Set.Pwsh.Disconnect" xml:space="preserve"><value>Disconnect</value></data>
+  <data name="Set.Pwsh.Checking" xml:space="preserve"><value>Checking PowerShell…</value></data>
+  <data name="Set.Pwsh.On" xml:space="preserve"><value>connected</value></data>
+  <data name="Set.Pwsh.Off" xml:space="preserve"><value>not connected</value></data>
+  <data name="Set.Pwsh.Blocked" xml:space="preserve"><value>profiles are off (execution policy {0})</value></data>
+  <data name="Set.Pwsh.Running" xml:space="preserve"><value>open windows with it: {0}</value></data>
+  <data name="Set.Pwsh.PolicyNote" xml:space="preserve"><value>A PowerShell whose execution policy is Restricted or AllSigned does not load profiles, so Lazarus leaves it alone. To allow your own profile, run in it: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned. Lazarus never changes the policy.</value></data>
 </root>

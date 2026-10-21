@@ -92,14 +92,12 @@
                 </StackPanel>
             </ui:CardExpander.Header>
             <StackPanel>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <ui:TextBox x:Name="HookBox" IsReadOnly="True" TextWrapping="Wrap" TextAlignment="Left" FontFamily="Cascadia Mono, Consolas" FontSize="12" ClearButtonEnabled="False" />
-                    <ui:Button x:Name="CopyButton" Grid.Column="1" Content="{l:T Set.Copy}" Icon="{ui:SymbolIcon Copy20}" Margin="8,0,0,0" VerticalAlignment="Top" />
-                </Grid>
+                <StackPanel Orientation="Horizontal">
+                    <ui:Button x:Name="ConnectButton" Appearance="Primary" Content="{l:T Set.Pwsh.Connect}" Icon="{ui:SymbolIcon PlugConnected20}" />
+                    <ui:Button x:Name="DisconnectButton" Content="{l:T Set.Pwsh.Disconnect}" Icon="{ui:SymbolIcon PlugDisconnected20}" Margin="8,0,0,0" />
+                </StackPanel>
+                <ui:TextBlock x:Name="PwshPolicy" TextWrapping="Wrap" Margin="0,8,0,0" Visibility="Collapsed"
+                              Foreground="{DynamicResource SystemFillColorCautionBrush}" />
                 <ui:TextBlock Text="{l:T Set.Pwsh.Note}" FontTypography="Caption" Appearance="Secondary" TextWrapping="Wrap" Margin="0,8,0,0" />
             </StackPanel>
         </ui:CardExpander>
