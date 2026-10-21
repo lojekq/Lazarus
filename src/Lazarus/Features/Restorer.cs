@@ -4,6 +4,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using Lazarus.Shell;
 using Windows.Win32;
+using Windows.Win32.Foundation;
 using Windows.Win32.UI.Shell;
 
 namespace Lazarus.Features;
@@ -21,9 +22,9 @@ public static class Restorer
 {
     public static Launch Plan(Entry e, string? path = null) => e.Kind switch
     {
-        EntryKind.Explorer => new("explorer.exe", null, Quote(path ?? e.Active ?? e.Paths![0]), null, false), // quoted: Explorer splits at commas
+        EntryKind.Explorer => new("explorer.exe", null, Quote(path ?? e.Paths?.FirstOrDefault() ?? e.Active!), null, false), // quoted: Explorer splits at commas
         EntryKind.Terminal => new("wt.exe", WtArgs.Build(e.Tabs ?? []), null, null, e.Elevated),
-        EntryKind.Packaged => new(e.Exe, null, null, null, false, e.Aumid),
+        EntryKind.Packaged => new(e.Exe, null, PackagedArgs(e), null, false, e.Aumid),
         _ => new(e.Exe, null, Args(e), e.WorkDir, e.Elevated),
     };
 
@@ -33,11 +34,19 @@ public static class Restorer
 
     static string Quote(string path) => $"\"{path}\"";
 
+    /// <summary>
+    /// A packaged app's own arguments (Notepad with a file) go to IApplicationActivationManager. A UWP app started by COM
+    /// (-ServerName:…, -Embedding) has none of its own.
+    /// </summary>
+    static string? PackagedArgs(Entry e) =>
+        e.CommandLine is null ? null : CmdLine.SplitExe(e.CommandLine).RawArgs is { Length: > 0 } a
+            && !a.Contains("-ServerName:", StringComparison.OrdinalIgnoreCase) && !a.Contains("Embedding", StringComparison.OrdinalIgnoreCase) ? a : null;
+
     /// <summary>The full command for the confirmation dialog and "Copy command".</summary>
     public static string CommandText(Entry e)
     {
         var l = Plan(e);
-        if (l.Aumid is not null) return $"shell:AppsFolder\\{l.Aumid}";
+        if (l.Aumid is not null) return $"shell:AppsFolder\\{l.Aumid}" + (l.RawArgs is { } a ? " " + a : "");
         var args = l.ArgList is null ? l.RawArgs : string.Join(" ", l.ArgList.Select(a => a.Contains(' ') ? $"\"{a}\"" : a));
         return string.IsNullOrEmpty(args) ? Quote(l.File) : $"{Quote(l.File)} {args}";
     }
@@ -45,15 +54,17 @@ public static class Restorer
     /// <summary>The exe or the folder is still there. Network and removable paths can hang for 20 s: the caller gives it 2 s.</summary>
     public static bool Exists(Entry e) => e.Kind switch
     {
-        EntryKind.Explorer => (e.Active ?? e.Paths?.FirstOrDefault()) is { } p && (p.StartsWith("::") || p.StartsWith("shell:") || Directory.Exists(p)),
+        EntryKind.Explorer => e.Paths?.Any(FolderExists) == true,
         EntryKind.Terminal => true,
         _ => File.Exists(e.Exe),
     };
 
+    public static bool FolderExists(string p) => p.StartsWith("::") || p.StartsWith("shell:") || Directory.Exists(p);
+
     /// <summary>Starts the launch; the pid when known (0 after ShellExecute or an Explorer window that joins the running explorer.exe).</summary>
     public static int Start(Launch l)
     {
-        if (l.Aumid is not null) return Activate(l.Aumid);
+        if (l.Aumid is not null) return Activate(l.Aumid, l.RawArgs);
         var psi = new ProcessStartInfo(l.File) { UseShellExecute = l.RunAs, WorkingDirectory = l.WorkDir ?? "" };
         if (l.RunAs) psi.Verb = "runas"; // UAC; the window will not be moved (UIPI)
         if (l.ArgList is not null) foreach (var a in l.ArgList) psi.ArgumentList.Add(a);
@@ -62,10 +73,10 @@ public static class Restorer
         return p?.Id ?? 0;
     }
 
-    static int Activate(string aumid)
+    static int Activate(string aumid, string? args)
     {
         var m = (IApplicationActivationManager)new ApplicationActivationManager();
-        m.ActivateApplication(aumid, null, ACTIVATEOPTIONS.AO_NONE, out var pid);
+        m.ActivateApplication(aumid, args, ACTIVATEOPTIONS.AO_NONE, out var pid);
         return (int)pid;
     }
 
@@ -122,6 +133,55 @@ public static class Restorer
     }
 
     static double Area(Rectangle r) => (double)r.Width * r.Height;
+
+    const uint WM_COMMAND = 0x0111, NewTabCommand = 0xA21B; // NativeFacts: Explorer's "new tab" command, sent to a tab window
+
+    /// <summary>
+    /// Opens each path as a new tab of the Explorer window, in order: "new tab" to the window, then BrowseObject in the tab that
+    /// appeared. Returns how many were added; the caller opens the rest as windows.
+    /// </summary>
+    public static async Task<int> AddTabs(nint root, IReadOnlyList<string> paths)
+    {
+        var added = 0;
+        foreach (var path in paths)
+        {
+            var before = ExplorerTracker.Instance.Windows.GetValueOrDefault(root)?.Tabs;
+            if (before is not { Count: > 0 }) break;
+            PInvoke.PostMessage((HWND)before[0], WM_COMMAND, NewTabCommand, 0);
+            nint fresh = 0;
+            for (var sw = Stopwatch.StartNew(); fresh == 0 && sw.Elapsed < TimeSpan.FromSeconds(3); await Task.Delay(150))
+            {
+                ExplorerTracker.Instance.PollNow();
+                fresh = ExplorerTracker.Instance.Windows.GetValueOrDefault(root)?.Tabs.Except(before).FirstOrDefault() ?? 0;
+            }
+            if (fresh == 0 || !await ExplorerTracker.Instance.Invoke(sw => ExplorerTracker.Navigate(sw, fresh, path))) break;
+            added++;
+        }
+        return added;
+    }
+
+    /// <summary>
+    /// Ctrl+1…8 in the Explorer window, once the user's own Ctrl, Shift, Alt and Win are up and the window is in front:
+    /// the tab that was active comes back active. No key is sent anywhere else.
+    /// </summary>
+    public static async Task SelectTab(nint root, int index)
+    {
+        if (index is < 0 or > 7) return;
+        for (var i = 0; i < 30 && ModifiersDown(); i++) await Task.Delay(100);
+        if (ModifiersDown() || PInvoke.GetForegroundWindow() != (HWND)root) return;
+        const byte VK_CONTROL = 0x11;
+        var key = (byte)('1' + index);
+        PInvoke.keybd_event(VK_CONTROL, 0, 0, 0);
+        PInvoke.keybd_event(key, 0, 0, 0);
+        PInvoke.keybd_event(key, 0, Windows.Win32.UI.Input.KeyboardAndMouse.KEYBD_EVENT_FLAGS.KEYEVENTF_KEYUP, 0);
+        PInvoke.keybd_event(VK_CONTROL, 0, Windows.Win32.UI.Input.KeyboardAndMouse.KEYBD_EVENT_FLAGS.KEYEVENTF_KEYUP, 0);
+    }
+
+    static bool ModifiersDown() => new[] { 0x10, 0x11, 0x12, 0x5B, 0x5C }.Any(vk => (PInvoke.GetAsyncKeyState(vk) & 0x8000) != 0);
+
+    /// <summary>The Explorer window a tab was closed in, if it is still open.</summary>
+    public static nint? LiveWindow(Entry e) =>
+        e.TabOf is { } h && PInvoke.IsWindow((HWND)(nint)h) && TopWindows.ClassOf((nint)h) == "CabinetWClass" ? (nint)h : null;
 }
 
 /// <summary>Arguments for `wt.exe -w new nt … ; nt …` (NativeFacts: -p takes the GUID, `\;` keeps a semicolon). Quoting is ArgumentList's.</summary>
@@ -152,7 +212,7 @@ public static partial class RiskClassifier
     {
         var r = new List<string>();
         if (e.Elevated) r.Add(Admin); // always asks, trusted or not
-        if (e.Kind is not (EntryKind.App or EntryKind.Console) || trusted.Contains(e.Exe, StringComparer.OrdinalIgnoreCase)) return r;
+        if (e.Kind is not (EntryKind.App or EntryKind.Console or EntryKind.Packaged) || trusted.Contains(e.Exe, StringComparer.OrdinalIgnoreCase)) return r;
         if (e.Kind == EntryKind.Console && !WindowTracker.Shells.Contains(e.ExeName)) r.Add(Console);
         var args = e.CommandLine is null ? [] : CmdLine.Args(CmdLine.SplitExe(e.CommandLine).RawArgs);
         if (args.Any(a => a.Contains("://"))) r.Add(Link);

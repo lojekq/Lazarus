@@ -74,6 +74,21 @@ public class RestorerTests
     }
 
     [TestMethod]
+    public void PackagedAppsGetTheirOwnArgumentsOnly()
+    {
+        Entry P(string cmd) => new() { Kind = EntryKind.Packaged, Exe = @"C:\Program Files\WindowsApps\Notepad\Notepad.exe", Aumid = "Microsoft.WindowsNotepad_8wekyb3d8bbwe!App", CommandLine = cmd };
+        Assert.AreEqual(@"""C:\Users\demo\notes.txt""", Restorer.Plan(P(@"""C:\Program Files\WindowsApps\Notepad\Notepad.exe"" ""C:\Users\demo\notes.txt""")).RawArgs);
+        Assert.IsNull(Restorer.Plan(P(@"""C:\Program Files\WindowsApps\Notepad\Notepad.exe""")).RawArgs);
+        Assert.IsNull(Restorer.Plan(P(@"""C:\Program Files\WindowsApps\Calc\CalculatorApp.exe"" -ServerName:App.AppXsm3pg4n7er43kdh1qp4e79f1j7am68r8.mca")).RawArgs, "a COM server start has no arguments of its own");
+        Assert.AreEqual(@"shell:AppsFolder\Microsoft.WindowsNotepad_8wekyb3d8bbwe!App ""C:\Users\demo\notes.txt""",
+            Restorer.CommandText(P(@"""C:\Program Files\WindowsApps\Notepad\Notepad.exe"" ""C:\Users\demo\notes.txt""")));
+    }
+
+    [TestMethod]
+    public void ExplorerWindowOpensAtTheFirstTab() =>
+        Assert.AreEqual(@"""C:\a""", Restorer.Plan(new Entry { Kind = EntryKind.Explorer, Exe = "explorer.exe", Paths = [@"C:\a", @"C:\b"], Active = @"C:\b" }).RawArgs);
+
+    [TestMethod]
     public void PlansNeverGoThroughAShell()
     {
         var e = App(@"""C:\Apps\tool.exe"" a ""b c"" & del x");

@@ -115,65 +115,99 @@ public static class Engine
 
     static void Ui(Action a) => Application.Current?.Dispatcher.BeginInvoke(a);
 
-    /// <summary>
-    /// Steps 2–6 of spec 03 §5 "Как проходит возврат", off the tracker loop. A cancelled or failed restore puts the entry back on top.
-    /// </summary>
+    /// <summary>A group comes back window by window, oldest first; each waits for its window, so they don't fight over the foreground.</summary>
     static async Task Restore(Entry e)
     {
         try
         {
-            bool exists;
-            try { exists = await Task.Run(() => Restorer.Exists(e)).WaitAsync(TimeSpan.FromSeconds(2)); }
-            catch (TimeoutException) { exists = false; } // a network or removable path that hangs
-            if (!exists)
-            {
-                Journal.Push(e with { Error = "unavailable" });
-                Toast(Loc.T(e.Kind == EntryKind.Explorer ? "Toast.FolderUnavailable" : "Toast.ExeMissing"));
-                Log.Info($"restore {e.Kind} {e.ExeName}: unavailable");
-                return;
-            }
-
-            var reasons = RiskClassifier.Reasons(e, Settings.Current.TrustedExes, WindowFilter.TempDirs, DownloadsFolder);
-            if (reasons.Count > 0 && !await Application.Current.Dispatcher.InvokeAsync(() => ConfirmDialog.Ask(e, reasons)))
-            {
-                Journal.Push(e);
-                return;
-            }
-
-            var path = e.Kind == EntryKind.Explorer ? e.Active ?? e.Paths![0] : null;
-            var before = Restorer.WindowsOf(e);
-            try { Restorer.Start(Restorer.Plan(e)); }
-            catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 1223) // ERROR_CANCELLED: "No" in the UAC prompt
-            {
-                Journal.Push(e);
-                return;
-            }
-            catch (Exception ex)
-            {
-                Journal.Push(e with { Error = "failed" });
-                Toast(string.Format(Loc.T("Toast.Failed"), e.Title));
-                Log.Warn($"restore {e.Kind} {e.ExeName}: start failed", ex);
-                return;
-            }
-
-            if (await Restorer.WaitForWindow(e, before, path) is not { } hwnd)
-            {
-                // Explorer set to open folders in tabs: the folder is back, as a tab of a window that was already open
-                if (path is not null && ExplorerTracker.Instance.Windows.Values.Any(w => w.Paths.Contains(path, StringComparer.OrdinalIgnoreCase)))
-                {
-                    Toast(string.Format(Loc.T("Toast.Restored"), View.Name(e)));
-                    return;
-                }
-                var fg = (nint)PInvoke.GetForegroundWindow();
-                Toast(Loc.T(before.Contains(fg) ? "Toast.AlreadyOpen" : "Toast.NoWindow"));
-                Log.Info($"restore {e.Kind} {e.ExeName}: {(before.Contains(fg) ? "already open" : "no window")}");
-                return;
-            }
-            if (!e.Elevated && e.Placement is { } place) await Restorer.PutBack(hwnd, place); // UIPI: an elevated window can't be moved
+            if (e.Kind != EntryKind.Group) { await RestoreOne(e, toast: true); return; }
+            foreach (var item in e.Items!.AsEnumerable().Reverse()) await RestoreOne(item, toast: false);
             Toast(string.Format(Loc.T("Toast.Restored"), View.Name(e)));
-            Log.Info($"restore {e.Kind} {e.ExeName}: ok");
         }
         catch (Exception ex) { Log.Error("restore", ex); }
+    }
+
+    /// <summary>
+    /// Steps 2–6 of spec 03 §5 "Как проходит возврат", off the tracker loop. A cancelled or failed restore puts the entry back on top.
+    /// </summary>
+    static async Task RestoreOne(Entry e, bool toast)
+    {
+        // A tab closed in a window that is still open goes back into that window (v1.0)
+        if (e.Kind == EntryKind.Explorer && Restorer.LiveWindow(e) is { } window && await Restorer.AddTabs(window, e.Paths!) == e.Paths!.Count)
+        {
+            PInvoke.SetForegroundWindow((HWND)window);
+            if (toast) Toast(string.Format(Loc.T("Toast.Restored"), View.Name(e)));
+            Log.Info("restore Explorer tab: ok");
+            return;
+        }
+
+        // Explorer: only the folders still there. A network or removable path can hang for 20 s: 2 s for all of them
+        List<string>? paths = null;
+        bool exists;
+        try
+        {
+            if (e.Kind == EntryKind.Explorer) exists = (paths = await Task.Run(() => e.Paths!.Where(Restorer.FolderExists).ToList()).WaitAsync(TimeSpan.FromSeconds(2))).Count > 0;
+            else exists = await Task.Run(() => Restorer.Exists(e)).WaitAsync(TimeSpan.FromSeconds(2));
+        }
+        catch (TimeoutException) { exists = false; }
+        if (!exists)
+        {
+            Journal.Push(e with { Error = "unavailable" });
+            Toast(Loc.T(e.Kind == EntryKind.Explorer ? "Toast.FolderUnavailable" : "Toast.ExeMissing"));
+            Log.Info($"restore {e.Kind} {e.ExeName}: unavailable");
+            return;
+        }
+
+        var reasons = RiskClassifier.Reasons(e, Settings.Current.TrustedExes, WindowFilter.TempDirs, DownloadsFolder);
+        if (reasons.Count > 0 && !await Application.Current.Dispatcher.InvokeAsync(() => ConfirmDialog.Ask(e, reasons)))
+        {
+            Journal.Push(e);
+            return;
+        }
+
+        var path = paths?[0];
+        var before = Restorer.WindowsOf(e);
+        try { Restorer.Start(Restorer.Plan(e, path)); }
+        catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 1223) // ERROR_CANCELLED: "No" in the UAC prompt
+        {
+            Journal.Push(e);
+            return;
+        }
+        catch (Exception ex)
+        {
+            Journal.Push(e with { Error = "failed" });
+            Toast(string.Format(Loc.T("Toast.Failed"), e.Title));
+            Log.Warn($"restore {e.Kind} {e.ExeName}: start failed", ex);
+            return;
+        }
+
+        if (await Restorer.WaitForWindow(e, before, path) is not { } hwnd)
+        {
+            // Explorer set to open folders in tabs: the folder is back, as a tab of a window that was already open
+            if (path is not null && ExplorerTracker.Instance.Windows.Values.Any(w => w.Paths.Contains(path, StringComparer.OrdinalIgnoreCase)))
+            {
+                if (toast) Toast(string.Format(Loc.T("Toast.Restored"), View.Name(e)));
+                return;
+            }
+            var fg = (nint)PInvoke.GetForegroundWindow();
+            if (toast) Toast(Loc.T(before.Contains(fg) ? "Toast.AlreadyOpen" : "Toast.NoWindow"));
+            Log.Info($"restore {e.Kind} {e.ExeName}: {(before.Contains(fg) ? "already open" : "no window")}");
+            return;
+        }
+        if (!e.Elevated && e.Placement is { } place) await Restorer.PutBack(hwnd, place); // UIPI: an elevated window can't be moved
+
+        // Explorer's other tabs come back as tabs of the same window, the active one active again; what fails opens as windows
+        if (paths is { Count: > 1 })
+        {
+            var rest = paths.Skip(1).ToList();
+            var added = await Restorer.AddTabs(hwnd, rest);
+            foreach (var p in rest.Skip(added))
+                try { Restorer.Start(Restorer.Plan(e, p)); } catch (Exception ex) { Log.Warn("tab as a window failed", ex); }
+            if (added == rest.Count && e.Active is { } active && paths.IndexOf(active) is > 0 and var i) await Restorer.SelectTab(hwnd, i);
+            Log.Info($"restore Explorer: {added + 1} of {paths.Count} as tabs");
+        }
+        if (toast) Toast(string.Format(Loc.T("Toast.Restored"), View.Name(e)));
+        Log.Info($"restore {e.Kind} {e.ExeName}: ok");
     }
 
     static readonly Lazy<string?> Downloads = new(() => { try { return Paths.Downloads; } catch { return null; } });

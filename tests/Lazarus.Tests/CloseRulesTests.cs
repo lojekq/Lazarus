@@ -78,6 +78,18 @@ public class CloseRulesTests
         CollectionAssert.AreEqual(new[] { "a", "b", "c" }, tabs.Select(t => t.Cwd).ToArray(), "in [−1 s; +3 s], oldest tab first");
     }
 
+    [TestMethod]
+    public void ClosedExplorerTabs()
+    {
+        var before = new ExplorerWindow([@"C:\a", @"C:\b", @"C:\c"], @"C:\a", [1, 2, 3]);
+        var now = new ExplorerWindow([@"C:\a", @"C:\c2"], @"C:\a", [1, 3]);      // tab 3 navigated, tab 2 went
+        var other = new ExplorerWindow([@"C:\x"], @"C:\x", [9]);
+        CollectionAssert.AreEqual(new[] { ((nint)2, @"C:\b") }, CloseRules.ClosedTabs(before, now, [other]));
+        var draggedOut = new ExplorerWindow([@"C:\b"], @"C:\b", [2]);
+        Assert.HasCount(0, CloseRules.ClosedTabs(before, now, [draggedOut]), "a tab dragged into another window is not closed");
+        Assert.HasCount(0, CloseRules.ClosedTabs(now, now with { Tabs = [1, 3, 4], Paths = [@"C:\a", @"C:\c2", @"C:\d"] }, []), "a new tab closes nothing");
+    }
+
     static CloseVerdict Decide(EntryKind kind, DateTime now, bool paused = false, int paths = 0, int tabs = 0, bool ended = false, bool shell = false) =>
         CloseRules.Decide(kind, shell, T, now, paused, paths, tabs, ended);
 }

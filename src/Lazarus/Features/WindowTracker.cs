@@ -32,6 +32,7 @@ public sealed class WindowTracker(Journal journal)
     readonly Dictionary<nint, Win> wins = [];
     readonly List<Pending> pending = [];
     readonly List<ExitedShell> exited = [];
+    readonly List<(Win Win, nint Tab, string Path, DateTime Gone)> closedTabs = [];
     string[] exclusions = [];
 
     /// <summary>"Watching 23 windows".</summary>
@@ -155,7 +156,7 @@ public sealed class WindowTracker(Journal journal)
                     Proc = Get(w.Pid, table.TryGetValue(w.Pid, out var t) ? t.Name : null),
                 };
             win.HiddenSince = null;
-            if (!win.Proc.Excluded) Update(win, w.Title, displays);
+            if (!win.Proc.Excluded) Update(win, w.Title, displays, now, paused);
         }
 
         foreach (var win in wins.Values.Where(x => !seen.Contains(x.Hwnd)).ToArray())
@@ -185,11 +186,25 @@ public sealed class WindowTracker(Journal journal)
             }
         }
 
+        // A closed tab becomes an entry a tick later, if its window is still there and the tab went for good (not dragged out)
+        foreach (var t in closedTabs.Where(t => now - t.Gone >= TimeSpan.FromSeconds(1)).ToArray())
+        {
+            closedTabs.Remove(t);
+            if (paused || !wins.ContainsKey(t.Win.Hwnd) || PInvoke.IsWindow((HWND)t.Tab)) continue;
+            var name = Path.GetFileName(t.Path.TrimEnd('\\'));
+            journal.Push(new Entry
+            {
+                ClosedAt = Local(t.Gone), Kind = EntryKind.Explorer, Exe = t.Win.Proc.Path!, Placement = t.Win.Place, Monitor = t.Win.Monitor,
+                Title = name.Length > 0 && !t.Path.StartsWith("::") ? name : Loc.T("Kind.Explorer"), Paths = [t.Path], Active = t.Path, TabOf = t.Win.Hwnd,
+            });
+            Log.Info("entry Explorer tab");
+        }
+
         exited.RemoveAll(s => now - s.ExitedAt > TimeSpan.FromSeconds(10));
         Watched = wins.Values.Count(w => Significant(w, now));
     }
 
-    void Update(Win win, string title, List<Display> displays)
+    void Update(Win win, string title, List<Display> displays, DateTime now, bool paused)
     {
         win.Title = title;
         if (Placement.Read(win.Hwnd) is { } place)
@@ -201,6 +216,9 @@ public sealed class WindowTracker(Journal journal)
         switch (win.Class)
         {
             case "CabinetWClass" when ExplorerTracker.Instance.Windows.TryGetValue(win.Hwnd, out var ex):
+                if (win.Explorer is { } old && old != ex && !paused && Significant(win, now))
+                    foreach (var (tab, path) in CloseRules.ClosedTabs(old, ex, ExplorerTracker.Instance.Windows.Values.Where(o => o != ex)))
+                        closedTabs.Add((win, tab, path, now));
                 win.Explorer = ex;
                 break;
             case "ConsoleWindowClass" when Shells.Contains(win.Proc.Name):
@@ -247,14 +265,14 @@ public sealed class WindowTracker(Journal journal)
         var path = proc.Path!;
         var e = new Entry
         {
-            ClosedAt = DateTimeOffset.Now, Kind = p.Kind, Exe = path, Placement = w.Place, Monitor = w.Monitor, Elevated = proc.Elevated,
+            ClosedAt = Local(p.Gone), Kind = p.Kind, Exe = path, Placement = w.Place, Monitor = w.Monitor, Elevated = proc.Elevated,
             Title = IsPrivate(w.Title) ? Path.GetFileNameWithoutExtension(path) : w.Title,
         };
         return p.Kind switch
         {
             EntryKind.Explorer => e with { Paths = [.. w.Explorer!.Paths], Active = w.Explorer.Active },
             EntryKind.Terminal => e with { Tabs = tabs },
-            EntryKind.Packaged => e with { Aumid = proc.Aumid },
+            EntryKind.Packaged => e with { Aumid = proc.Aumid, CommandLine = proc.CommandLine },
             // A shell comes back as itself, never with its arguments: commands inside a shell are not repeated (spec 03 §8.1)
             EntryKind.Console => e with { CommandLine = p.IsShell ? Quote(path) : proc.CommandLine ?? Quote(path), WorkDir = Folder(proc) },
             _ => e with
@@ -266,6 +284,9 @@ public sealed class WindowTracker(Journal journal)
     }
 
     static string Quote(string path) => $"\"{path}\"";
+
+    /// <summary>When the window went (UTC tick) as local time: a process that took 10 s to exit still sorts by its close.</summary>
+    static DateTimeOffset Local(DateTime utc) => new DateTimeOffset(utc, TimeSpan.Zero).ToLocalTime();
 
     /// <summary>InPrivate and incognito windows keep only the program name.</summary>
     static bool IsPrivate(string title) =>

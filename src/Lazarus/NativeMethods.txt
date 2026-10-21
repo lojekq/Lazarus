@@ -61,3 +61,5 @@ PostMessage
 keybd_event
 SetForegroundWindow
 GetLongPathName
+SHParseDisplayName
+GetAsyncKeyState

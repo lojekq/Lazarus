@@ -9,8 +9,11 @@ using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Lazarus.Features;
 
-/// <summary>One Explorer window: the paths of its tabs (parsing names, special folders as ::{CLSID}) and the active one.</summary>
-public sealed record ExplorerWindow(IReadOnlyList<string> Paths, string Active);
+/// <summary>
+/// One Explorer window: the paths of its tabs (parsing names, special folders as ::{CLSID}) in tab order, the active one,
+/// and each tab's ShellTabWindowClass handle (same order), which stays the same while the tab navigates.
+/// </summary>
+public sealed record ExplorerWindow(IReadOnlyList<string> Paths, string Active, IReadOnlyList<nint> Tabs);
 
 /// <summary>
 /// Own STA thread: once a second IShellWindows → {CabinetWClass hwnd → tabs}. The snapshot is immutable and swapped atomically,
@@ -22,6 +25,7 @@ public sealed class ExplorerTracker
 
     volatile Snap snap = new(FrozenDictionary<nint, ExplorerWindow>.Empty, DateTime.UtcNow);
     readonly AutoResetEvent wake = new(false);
+    readonly System.Collections.Concurrent.ConcurrentQueue<Action<IShellWindows>> work = new();
     Thread? thread;
 
     sealed record Snap(FrozenDictionary<nint, ExplorerWindow> Windows, DateTime At);
@@ -41,6 +45,48 @@ public sealed class ExplorerTracker
     /// <summary>Take a snapshot now (before a restore, after a focus change).</summary>
     public void PollNow() => wake.Set();
 
+    /// <summary>Runs on the STA thread with the live ShellWindows (COM calls into Explorer must come from there).</summary>
+    internal Task<T> Invoke<T>(Func<IShellWindows, T> f)
+    {
+        var done = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+        work.Enqueue(sw =>
+        {
+            try { done.SetResult(f(sw)); }
+            catch (Exception e) { done.SetException(e); }
+        });
+        wake.Set();
+        return done.Task;
+    }
+
+    /// <summary>
+    /// The tab goes to the path, in place (IShellBrowser.BrowseObject, SBSP_SAMEBROWSER). False if the tab is not found
+    /// or the path does not parse.
+    /// </summary>
+    internal static unsafe bool Navigate(IShellWindows shell, nint tab, string path)
+    {
+        if (PInvoke.SHParseDisplayName(path, null, out var pidl, 0, out _).Failed) return false;
+        try
+        {
+            for (var i = 0; i < shell.Count; i++)
+            {
+                object? item = null;
+                try
+                {
+                    item = shell.Item(i);
+                    if (item is not IServiceProvider sp) continue;
+                    var browser = (IShellBrowser)sp.QueryService(ShellCom.SID_STopLevelBrowser, typeof(IShellBrowser).GUID);
+                    if (browser.GetWindow() != tab) continue;
+                    browser.BrowseObject((nint)pidl, 0x0001); // SBSP_SAMEBROWSER | SBSP_ABSOLUTE
+                    return true;
+                }
+                catch { }
+                finally { if (item is not null && Marshal.IsComObject(item)) Marshal.ReleaseComObject(item); }
+            }
+            return false;
+        }
+        finally { PInvoke.CoTaskMemFree(pidl); }
+    }
+
     void Loop(CancellationToken ct)
     {
         IShellWindows? shell = null;
@@ -49,6 +95,7 @@ public sealed class ExplorerTracker
             try
             {
                 shell ??= (IShellWindows)Activator.CreateInstance(Type.GetTypeFromCLSID(ShellCom.CLSID_ShellWindows)!)!;
+                while (work.TryDequeue(out var w)) w(shell);
                 snap = new(Take(shell).ToFrozenDictionary(), DateTime.UtcNow);
             }
             catch (Exception e)
@@ -86,7 +133,7 @@ public sealed class ExplorerTracker
         {
             var activeTab = (nint)PInvoke.FindWindowEx((HWND)g.Key, HWND.Null, NativeFacts.ShellTabClass, null);
             var active = g.FirstOrDefault(t => t.Tab == activeTab).Path ?? g.First().Path;
-            return new ExplorerWindow(g.Select(t => t.Path).ToList(), active);
+            return new ExplorerWindow(g.Select(t => t.Path).ToList(), active, g.Select(t => t.Tab).ToList());
         });
     }
 
@@ -129,7 +176,7 @@ interface IShellBrowser
 {
     nint GetWindow();
     void ContextSensitiveHelp(); void InsertMenusSB(); void SetMenuSB(); void RemoveMenusSB(); void SetStatusTextSB();
-    void EnableModelessSB(); void TranslateAcceleratorSB(); void BrowseObject(); void GetViewStateStream(); void GetControlWindow();
+    void EnableModelessSB(); void TranslateAcceleratorSB(); void BrowseObject(nint pidl, uint flags); void GetViewStateStream(); void GetControlWindow();
     void SendControlMsg();
     [return: MarshalAs(UnmanagedType.IUnknown)] object QueryActiveShellView();
 }

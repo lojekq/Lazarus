@@ -44,4 +44,11 @@ public static class CloseRules
     /// </summary>
     public static List<Tab> TabsOf(DateTime gone, IEnumerable<ExitedShell> exited) =>
         exited.Where(s => s.ExitedAt >= gone - TabsBefore && s.ExitedAt <= gone + TerminalWait).OrderBy(s => s.Started).Select(s => s.Tab).ToList();
+
+    /// <summary>
+    /// Tabs that left an Explorer window between two snapshots, with their last path. A tab handle found in another window
+    /// was dragged there, not closed. The tracker still waits a tick: if the whole window goes, its own entry covers the tabs.
+    /// </summary>
+    public static List<(nint Tab, string Path)> ClosedTabs(ExplorerWindow before, ExplorerWindow now, IEnumerable<ExplorerWindow> others) =>
+        before.Tabs.Zip(before.Paths).Where(t => !now.Tabs.Contains(t.First) && !others.Any(o => o.Tabs.Contains(t.First))).ToList();
 }

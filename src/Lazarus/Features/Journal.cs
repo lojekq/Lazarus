@@ -5,7 +5,7 @@ using Lazarus.Shell;
 
 namespace Lazarus.Features;
 
-public enum EntryKind { App, Packaged, Explorer, Terminal, Console }
+public enum EntryKind { App, Packaged, Explorer, Terminal, Console, Group }
 
 /// <summary>A Windows Terminal tab: its shell (file name), WT profile GUID and folder; null folder = the profile's own.</summary>
 public sealed record Tab(string Shell, string? Profile, string? Cwd);
@@ -17,8 +17,9 @@ public sealed record Tab(string Shell, string? Profile, string? Cwd);
 public sealed record Place(int ShowCmd, int[] Normal, int[] Rect);
 
 /// <summary>
-/// One closed window. Fields by kind (spec 03 §5): App and Console → CommandLine, WorkDir; Packaged → Aumid;
-/// Explorer → Paths, Active; Terminal → Tabs.
+/// One closed window. Fields by kind (spec 03 §5): App and Console → CommandLine, WorkDir; Packaged → Aumid, CommandLine;
+/// Explorer → Paths, Active, and TabOf for a tab closed in a window that stayed open; Terminal → Tabs;
+/// Group → Items (three or more windows closed within 2 s: an Explorer restart, a crash).
 /// </summary>
 public sealed record Entry
 {
@@ -36,6 +37,8 @@ public sealed record Entry
     public List<string>? Paths { get; init; }
     public string? Active { get; init; }
     public List<Tab>? Tabs { get; init; }
+    public long? TabOf { get; init; }           // the Explorer window (HWND) the tab was closed in
+    public List<Entry>? Items { get; init; }    // Group: newest first
     public string? Error { get; init; }         // the last restore failed: "unavailable", "failed"
 
     [JsonIgnore] public string ExeName => System.IO.Path.GetFileName(Exe);
@@ -71,7 +74,26 @@ public sealed class Journal
 
     public IReadOnlyList<Entry> Entries { get { lock (gate) { Prune(); return entries.ToArray(); } } }
 
-    public void Push(Entry e) => Change(() => entries.Insert(0, e));
+    /// <summary>Three or more entries closed within 2 s of each other become one Group entry ("restore all").</summary>
+    public static readonly TimeSpan GroupSpan = TimeSpan.FromSeconds(2);
+
+    public void Push(Entry e) => Change(() =>
+    {
+        if (e.Kind != EntryKind.Group && entries.FirstOrDefault() is { Kind: EntryKind.Group } g && Near(g.Items![0], e))
+        {
+            entries[0] = g with { ClosedAt = Max(g.ClosedAt, e.ClosedAt), Items = [.. g.Items!.Append(e).OrderByDescending(x => x.ClosedAt)] };
+            return;
+        }
+        var near = e.Kind == EntryKind.Group ? [] : entries.TakeWhile(x => x.Kind != EntryKind.Group && Near(x, e)).ToList();
+        if (near.Count < 2) { entries.Insert(0, e); return; }
+        entries.RemoveRange(0, near.Count);
+        var items = near.Append(e).OrderByDescending(x => x.ClosedAt).ToList();
+        entries.Insert(0, new Entry { Kind = EntryKind.Group, ClosedAt = items[0].ClosedAt, Items = items });
+    });
+
+    static bool Near(Entry a, Entry b) => (a.ClosedAt - b.ClosedAt).Duration() <= GroupSpan;
+
+    static DateTimeOffset Max(DateTimeOffset a, DateTimeOffset b) => a > b ? a : b;
 
     /// <summary>The newest entry, removed; null if empty.</summary>
     public Entry? Pop()

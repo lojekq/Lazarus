@@ -129,4 +129,8 @@
   <data name="Demo.Notepad" xml:space="preserve"><value>notes.txt — Блокнот</value></data>
   <data name="Demo.Downloads" xml:space="preserve"><value>Загрузки</value></data>
   <data name="Demo.Admin" xml:space="preserve"><value>Администратор: C:\Windows\System32\cmd.exe</value></data>
+  <data name="Explorer.ClosedTab" xml:space="preserve"><value>закрытая вкладка</value></data>
+  <data name="Group.One" xml:space="preserve"><value>{0} окно</value></data>
+  <data name="Group.Few" xml:space="preserve"><value>{0} окна</value></data>
+  <data name="Group.Many" xml:space="preserve"><value>{0} окон</value></data>
 </root>

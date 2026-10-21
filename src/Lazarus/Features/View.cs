@@ -25,6 +25,7 @@ public static class View
     {
         EntryKind.Explorer => $"{Loc.T("Kind.Explorer")} — {e.Title}",
         EntryKind.Terminal => $"Windows Terminal — {Plural("TermTabs", e.Tabs?.Count ?? 0)}",
+        EntryKind.Group => Plural("Group", e.Items?.Count ?? 0),
         _ => e.Title.Length > 0 ? e.Title : e.ExeName,
     };
 
@@ -35,7 +36,9 @@ public static class View
         {
             case EntryKind.Explorer:
                 var n = e.Paths?.Count ?? 0;
-                return n > 1 ? $"{e.Active} · {Plural("Tabs", n - 1)}" : e.Active ?? "";
+                return e.TabOf is not null ? $"{e.Active} · {Loc.T("Explorer.ClosedTab")}" : n > 1 ? $"{e.Active} · {Plural("Tabs", n - 1)}" : e.Active ?? "";
+            case EntryKind.Group:
+                return string.Join(", ", e.Items?.Select(i => i.Kind == EntryKind.Explorer ? i.Title : Name(i)) ?? []);
             case EntryKind.Terminal:
                 var tabs = e.Tabs ?? [];
                 return $"Windows Terminal · {Plural("TermTabs", tabs.Count)}" + (tabs.Count > 0 ? ": " + string.Join(", ", tabs.Select(TabName)) : "");
@@ -72,11 +75,13 @@ public static class View
 
     /// <summary>The program's own icon; null → a glyph by kind (always in --demo, so pictures don't depend on what is installed).</summary>
     public static ImageSource? Icon(Entry e) =>
-        Args.Current.Demo || e.Kind is EntryKind.Explorer or EntryKind.Terminal ? null : ExeIcon.Get(e.Exe);
+        Args.Current.Demo || e.Kind is EntryKind.Explorer or EntryKind.Terminal or EntryKind.Group ? null : ExeIcon.Get(e.Exe);
 
     public static SymbolRegular Glyph(Entry e) => e.Kind switch
     {
+        EntryKind.Explorer when e.TabOf is not null => SymbolRegular.Tab24,
         EntryKind.Explorer => SymbolRegular.Folder24,
+        EntryKind.Group => SymbolRegular.WindowMultiple20,
         EntryKind.Terminal or EntryKind.Console => SymbolRegular.WindowConsole20,
         _ => SymbolRegular.AppGeneric24,
     };
@@ -86,7 +91,7 @@ public static class View
 public sealed class EntryView(Entry e, DateTimeOffset now, IReadOnlyList<string> reasons)
 {
     public Entry Entry { get; } = e;
-    public string Title { get; } = e.Title.Length > 0 ? e.Title : e.ExeName;
+    public string Title { get; } = e.Kind == EntryKind.Group ? View.Name(e) : e.Title.Length > 0 ? e.Title : e.ExeName;
     public string Detail { get; } = View.Detail(e);
     public string Time { get; } = View.Ago(e.ClosedAt, now);
     public string Monitor { get; } = View.Monitor(e.Monitor);
@@ -99,5 +104,6 @@ public sealed class EntryView(Entry e, DateTimeOffset now, IReadOnlyList<string>
 
     public bool Matches(string q) =>
         q.Length == 0 || new[] { Title, Detail, Entry.Exe, Entry.CommandLine, Entry.WorkDir }.Concat(Entry.Paths ?? []).Concat(Entry.Tabs?.Select(t => t.Cwd) ?? [])
+            .Concat(Entry.Items?.SelectMany(i => new[] { i.Title, i.Exe }.Concat(i.Paths ?? [])) ?? [])
             .Any(s => s?.Contains(q, StringComparison.CurrentCultureIgnoreCase) == true);
 }

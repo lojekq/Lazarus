@@ -34,7 +34,7 @@ public class JournalTests
     {
         var j = new Journal { Now = () => Now };
         j.Push(E("old", daysAgo: 7.01));
-        for (var i = 0; i < 31; i++) j.Push(E($"n{i}"));
+        for (var i = 0; i < 31; i++) j.Push(E($"n{i}") with { ClosedAt = Now.AddMinutes(i - 31) }); // apart, or they group
         Assert.HasCount(30, j.Entries);
         Assert.AreEqual("n30", j.Entries[0].Title);
         Assert.AreEqual("n1", j.Entries[^1].Title);
@@ -83,6 +83,37 @@ public class JournalTests
         Assert.HasCount(1, Directory.GetFiles(Path.GetDirectoryName(file)!, "journal.bad-*.json"));
         j.Push(E("new"));
         Assert.IsTrue(File.Exists(file));
+    }
+
+    [TestMethod]
+    public void ThreeClosesWithin2sBecomeOneGroup()
+    {
+        var j = new Journal { Now = () => Now };
+        j.Push(E("old", daysAgo: 0.01));
+        j.Push(E("a") with { ClosedAt = Now.AddSeconds(-1.5) });
+        j.Push(E("b") with { ClosedAt = Now.AddSeconds(-0.5) });
+        Assert.HasCount(3, j.Entries, "two closes are two entries");
+        j.Push(E("c"));
+        Assert.HasCount(2, j.Entries);
+        var g = j.Entries[0];
+        Assert.AreEqual(EntryKind.Group, g.Kind);
+        CollectionAssert.AreEqual(new[] { "c", "b", "a" }, g.Items!.Select(i => i.Title).ToArray());
+        j.Push(E("d") with { ClosedAt = Now.AddSeconds(1) });
+        CollectionAssert.AreEqual(new[] { "d", "c", "b", "a" }, j.Entries[0].Items!.Select(i => i.Title).ToArray(), "a 4th close joins the group");
+        j.Push(E("later") with { ClosedAt = Now.AddSeconds(10) });
+        CollectionAssert.AreEqual(new[] { "later", "", "old" }, j.Entries.Select(e => e.Title).ToArray());
+    }
+
+    [TestMethod]
+    public void GroupSurvivesJson()
+    {
+        var file = NewFile();
+        var j = new Journal { Now = () => Now, File = file };
+        foreach (var t in new[] { "a", "b", "c" }) j.Push(E(t));
+        var back = new Journal { Now = () => Now, File = file };
+        back.Load();
+        Assert.AreEqual(EntryKind.Group, back.Entries[0].Kind);
+        Assert.HasCount(3, back.Entries[0].Items!);
     }
 
     [TestMethod]

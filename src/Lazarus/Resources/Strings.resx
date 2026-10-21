@@ -129,4 +129,8 @@ Open the folder?</value></data>
   <data name="Demo.Notepad" xml:space="preserve"><value>notes.txt - Notepad</value></data>
   <data name="Demo.Downloads" xml:space="preserve"><value>Downloads</value></data>
   <data name="Demo.Admin" xml:space="preserve"><value>Administrator: C:\Windows\System32\cmd.exe</value></data>
+  <data name="Explorer.ClosedTab" xml:space="preserve"><value>closed tab</value></data>
+  <data name="Group.One" xml:space="preserve"><value>{0} window</value></data>
+  <data name="Group.Few" xml:space="preserve"><value>{0} windows</value></data>
+  <data name="Group.Many" xml:space="preserve"><value>{0} windows</value></data>
 </root>

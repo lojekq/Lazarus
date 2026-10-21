@@ -44,7 +44,8 @@ public partial class JournalPage
             var e = Selected?.Entry;
             foreach (var item in new[] { MenuRestore, MenuCopy, MenuFolder, MenuExclude, MenuDelete }) item.IsEnabled = e is not null;
             MenuOpenAll.Visibility = e is { Kind: EntryKind.Explorer, Paths.Count: > 1 } ? Visibility.Visible : Visibility.Collapsed;
-            MenuExclude.Visibility = e is { Kind: EntryKind.Explorer or EntryKind.Terminal } ? Visibility.Collapsed : Visibility.Visible;
+            MenuExclude.Visibility = e is { Kind: EntryKind.Explorer or EntryKind.Terminal or EntryKind.Group } ? Visibility.Collapsed : Visibility.Visible;
+            MenuCopy.Visibility = MenuFolder.Visibility = e is { Kind: EntryKind.Group } ? Visibility.Collapsed : Visibility.Visible;
         };
         MenuRestore.Click += (_, _) => { if (Selected is { } v) Engine.Restore(v.Entry.Id); };
         MenuOpenAll.Click += (_, _) => { if (Selected is { } v) Engine.OpenAll(v.Entry); };
