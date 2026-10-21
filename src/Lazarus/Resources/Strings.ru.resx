@@ -55,7 +55,7 @@
   <data name="Uninstall.Ask" xml:space="preserve"><value>Удалить {0}?
 
 Будут удалены программа, ярлык в «Пуске», автозапуск и запись в «Параметры → Приложения».</value></data>
-  <data name="Uninstall.Data" xml:space="preserve"><value>Удалить также настройки и логи</value></data>
+  <data name="Uninstall.Data" xml:space="preserve"><value>Удалить также настройки, журнал и логи</value></data>
   <data name="Uninstall.Button" xml:space="preserve"><value>Удалить</value></data>
   <data name="Uninstall.Done" xml:space="preserve"><value>Программа {0} удалена.</value></data>
   <data name="Uninstall.Leftover" xml:space="preserve"><value>Часть файлов занята и осталась в {0}. Удалите папку позже.</value></data>

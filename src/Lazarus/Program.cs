@@ -21,6 +21,10 @@ public static class Program
             catch (Exception e) { Log.Error($"{args[0]} failed", e); return 1; }
         }
         Args.Current = Args.Parse(args);
+        // The UI language is set here, not in the async App.OnStartup: the culture is an AsyncLocal, so a change made there
+        // is undone at its first await, and everything created later (Loaded, timers, BeginInvoke) spoke the Windows language
+        Settings.Load();
+        Loc.Apply(Settings.Current.Language);
         var app = new App();
         app.InitializeComponent();
         return app.Run();

@@ -29,9 +29,7 @@ public partial class App : Application
         base.OnStartup(e);
         var a = Args.Current;
         Crash.Install(this);
-        Settings.Load();
-        Loc.Apply(Settings.Current.Language);
-        // Lazarus registers nothing outside its data folder, so App.RemoveData stays null; services start below the installer
+        // Settings and the language are loaded in Program.Main (see there). Lazarus registers nothing outside its data folder, so App.RemoveData stays null; services start below the installer
         if (await Installer.HandleAsync()) // install, update, switch to the installed copy or uninstall: this process is done
         {
             Shutdown();

@@ -20,6 +20,7 @@ public partial class JournalPage
     {
         InitializeComponent();
         HotkeyHint.Text = Engine.HotkeyText;
+        if (Args.Current.Screenshot is not null) List.IsHitTestVisible = false; // no hover highlight where the mouse happens to be
         EmptyText.Text = string.Format(Loc.T("Journal.Empty"), Engine.HotkeyText);
 
         void Changed() => Dispatcher.BeginInvoke(Refresh);
