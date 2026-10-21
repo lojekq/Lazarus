@@ -97,7 +97,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <ui:TextBox x:Name="HookBox" IsReadOnly="True" TextWrapping="Wrap" FontFamily="Cascadia Mono, Consolas" FontSize="12" ClearButtonEnabled="False" />
+                    <ui:TextBox x:Name="HookBox" IsReadOnly="True" TextWrapping="Wrap" TextAlignment="Left" FontFamily="Cascadia Mono, Consolas" FontSize="12" ClearButtonEnabled="False" />
                     <ui:Button x:Name="CopyButton" Grid.Column="1" Content="{l:T Set.Copy}" Icon="{ui:SymbolIcon Copy20}" Margin="8,0,0,0" VerticalAlignment="Top" />
                 </Grid>
                 <ui:TextBlock Text="{l:T Set.Pwsh.Note}" FontTypography="Caption" Appearance="Secondary" TextWrapping="Wrap" Margin="0,8,0,0" />

@@ -56,15 +56,20 @@ public partial class SettingsSection
         {
             PwshStatus.Text = PwshHookStatus();
             // The README screenshot shows Lazarus' own block, not the shell's language and theme
-            if (Args.Current.Screenshot is not null && FindScroll(this) is { } sv)
-                sv.ScrollToVerticalOffset(TransformToAncestor((Visual)sv.Content).Transform(new Point()).Y - 12);
+            if (Args.Current.Screenshot is not null)
+                Dispatcher.BeginInvoke(() =>
+                {
+                    // The page's own ScrollViewer may not scroll (NavigationView gives it all the height): take the one that does
+                    if (FindScroll(this) is { } sv)
+                        sv.ScrollToVerticalOffset(sv.VerticalOffset + TransformToAncestor(sv).Transform(new Point()).Y - 12);
+                }, System.Windows.Threading.DispatcherPriority.ContextIdle); // after layout, or there is nothing to scroll yet
         };
     }
 
     static ScrollViewer? FindScroll(DependencyObject d)
     {
         for (var p = VisualTreeHelper.GetParent(d); p is not null; p = VisualTreeHelper.GetParent(p))
-            if (p is ScrollViewer sv) return sv;
+            if (p is ScrollViewer { ScrollableHeight: > 0 } sv) return sv;
         return null;
     }
 

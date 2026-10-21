@@ -22,7 +22,7 @@
             <ui:TextBlock x:Name="ExeText" TextWrapping="Wrap" Margin="0,2,0,10" />
 
             <ui:TextBlock FontTypography="Caption" Appearance="Secondary" Text="{l:T Confirm.Command}" />
-            <ui:TextBox x:Name="CommandBox" IsReadOnly="True" TextWrapping="Wrap" MaxHeight="140" Margin="0,4,0,10"
+            <ui:TextBox x:Name="CommandBox" IsReadOnly="True" TextWrapping="Wrap" TextAlignment="Left" MaxHeight="140" Margin="0,4,0,10"
                         FontFamily="Cascadia Mono, Consolas" ClearButtonEnabled="False" VerticalScrollBarVisibility="Auto" />
 
             <StackPanel x:Name="FolderPanel">

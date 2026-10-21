@@ -128,4 +128,5 @@
   <data name="Set.Copy" xml:space="preserve"><value>Копировать</value></data>
   <data name="Demo.Notepad" xml:space="preserve"><value>notes.txt — Блокнот</value></data>
   <data name="Demo.Downloads" xml:space="preserve"><value>Загрузки</value></data>
+  <data name="Demo.Admin" xml:space="preserve"><value>Администратор: C:\Windows\System32\cmd.exe</value></data>
 </root>

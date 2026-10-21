@@ -32,7 +32,7 @@ public static class Engine
 
     public static void Start()
     {
-        ApplyJournalSettings();
+        ApplyJournalSettings(save: false); // a save here would write the still empty journal over the file before Load
         if (Args.Current.Demo)
         {
             DemoData.Fill(Journal);
@@ -57,7 +57,7 @@ public static class Engine
     }
 
     /// <summary>After a settings change: size, retention, keep on disk or not (off deletes the file).</summary>
-    public static void ApplyJournalSettings()
+    public static void ApplyJournalSettings(bool save = true)
     {
         var s = Settings.Current;
         Journal.Limit = Math.Clamp(s.JournalSize, 10, 100);
@@ -67,7 +67,7 @@ public static class Engine
             foreach (var f in new[] { old, old + ".bak" })
                 try { File.Delete(f); } catch (Exception e) { Log.Warn("journal file not deleted", e); }
         Journal.File = file;
-        Journal.RemoveWhere(_ => false); // prune and save with the new limits
+        if (save) Journal.RemoveWhere(_ => false); // prune and save with the new limits
     }
 
     public static HotkeyStatus ApplyHotkey()
@@ -158,6 +158,12 @@ public static class Engine
 
             if (await Restorer.WaitForWindow(e, before, path) is not { } hwnd)
             {
+                // Explorer set to open folders in tabs: the folder is back, as a tab of a window that was already open
+                if (path is not null && ExplorerTracker.Instance.Windows.Values.Any(w => w.Paths.Contains(path, StringComparer.OrdinalIgnoreCase)))
+                {
+                    Toast(string.Format(Loc.T("Toast.Restored"), View.Name(e)));
+                    return;
+                }
                 var fg = (nint)PInvoke.GetForegroundWindow();
                 Toast(Loc.T(before.Contains(fg) ? "Toast.AlreadyOpen" : "Toast.NoWindow"));
                 Log.Info($"restore {e.Kind} {e.ExeName}: {(before.Contains(fg) ? "already open" : "no window")}");

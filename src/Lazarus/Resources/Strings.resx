@@ -128,4 +128,5 @@ Open the folder?</value></data>
   <data name="Set.Copy" xml:space="preserve"><value>Copy</value></data>
   <data name="Demo.Notepad" xml:space="preserve"><value>notes.txt - Notepad</value></data>
   <data name="Demo.Downloads" xml:space="preserve"><value>Downloads</value></data>
+  <data name="Demo.Admin" xml:space="preserve"><value>Administrator: C:\Windows\System32\cmd.exe</value></data>
 </root>

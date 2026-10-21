@@ -39,5 +39,8 @@ public static class NativeFacts
 
     // A classic console window (ConsoleWindowClass) reports the console's client (cmd.exe) as its pid, not conhost.exe.
 
+    // Checked end to end (2026-10-21): `explorer.exe "<path>"` opens paths with spaces, Cyrillic, #, comma, % and ; and a quoted
+    // ::{CLSID}; SetWindowPlacement puts a maximized Explorer back on DISPLAY2; WT -p {GUID} -d restores pwsh (hook), cmd (after cd).
+
     // Not checked: the AUMID of an ApplicationFrameHost (UWP) window through its CoreWindow child; no UWP window was open.
 }

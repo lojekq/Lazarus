@@ -35,7 +35,7 @@ public static class DemoData
             new() { ClosedAt = now.AddMinutes(-41), Kind = EntryKind.App, Title = "Blender", Exe = @"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe",
                 CommandLine = @"""C:\Program Files\Blender Foundation\Blender 4.5\blender.exe""", WorkDir = @"C:\Program Files\Blender Foundation\Blender 4.5",
                 Placement = P(0, 0, 3440, 1408, 3), Monitor = "DISPLAY1" },
-            new() { ClosedAt = now.AddMinutes(-58), Kind = EntryKind.Console, Title = @"Administrator: C:\Windows\System32\cmd.exe", Exe = @"C:\Windows\System32\cmd.exe",
+            new() { ClosedAt = now.AddMinutes(-58), Kind = EntryKind.Console, Title = Loc.T("Demo.Admin"), Exe = @"C:\Windows\System32\cmd.exe",
                 CommandLine = @"""C:\Windows\System32\cmd.exe""", WorkDir = @"C:\Windows\System32", Elevated = true,
                 Placement = P(200, 200, 1400, 900), Monitor = "DISPLAY1" },
             new() { ClosedAt = now.AddMinutes(-85), Kind = EntryKind.Console, Title = "python train.py", Exe = @"C:\Users\demo\AppData\Local\Programs\Python\Python313\python.exe",
