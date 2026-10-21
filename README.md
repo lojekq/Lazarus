@@ -60,16 +60,17 @@ $ExecutionContext.InvokeCommand.LocationChangedAction = { param($s, $e) if ($e.N
 
 ## Download
 
-1. Get **`Lazarus-x.y.z-win-x64.exe`** from [Releases](https://github.com/lojekq/Lazarus/releases/latest). Single file, no install, no admin.
-2. Smaller build: `Lazarus-x.y.z-win-x64-fd.zip` (needs [.NET Desktop Runtime 10](https://dotnet.microsoft.com/download/dotnet/10.0)).
+1. **[Download Lazarus.exe](https://github.com/lojekq/Lazarus/releases/latest/download/Lazarus.exe)** (latest release). Single file, no admin rights.
+2. Smaller build: [`Lazarus-fd.zip`](https://github.com/lojekq/Lazarus/releases/latest/download/Lazarus-fd.zip) (needs [.NET Desktop Runtime 10](https://dotnet.microsoft.com/download/dotnet/10.0)).
 3. Optional check: `gh attestation verify <file> -R lojekq/Lazarus` or compare with `SHA256SUMS.txt`.
 
 Requirements: Windows 11 x64. Windows 10 22H2 should work but is not tested.
 
 ## First run
 
-Put the exe into a permanent folder first, for example `%LOCALAPPDATA%\Programs\Lazarus\`: autostart and the shortcut point to it.
-On the first start Windows may show a SmartScreen warning (see FAQ). Lazarus then lives in the tray; turn on **Start with Windows** in Settings, since it can only bring back windows it saw open.
+Run the downloaded exe from anywhere. Windows may first show a SmartScreen warning (see FAQ).
+Lazarus offers to install itself: **Install** copies it to `%LOCALAPPDATA%\Programs\Lazarus\` and adds a Start menu shortcut, autostart (it can only bring back windows it saw open) and an entry in Settings → Apps; no admin rights needed.
+**Run without installing** keeps it portable. To update, run the new exe the same way: it replaces the installed one and restarts it.
 
 ## Settings
 
@@ -81,7 +82,9 @@ On the first start Windows may show a SmartScreen warning (see FAQ). Lazarus the
 | Keep the journal between restarts | on | Off: the journal lives in memory only |
 | Don't remember | empty | Exe names or path masks, on top of the built-in list (installers, Temp, Steam and Epic games) |
 | Start without asking | empty | Programs you ticked "Don't ask again" for |
-| Language, theme, Start with Windows, Start menu shortcut, check for updates | | As in every app of the set |
+| Start with Windows, Start menu shortcut | on after installing | Starts minimized to the tray |
+| Installation | — | Install, or Uninstall for the installed copy |
+| Language, theme, check for updates | | As in every app of the set |
 
 Settings, the journal and logs live in `%APPDATA%\Lazarus`.
 
@@ -122,7 +125,8 @@ Windows PowerShell 5.1 has no hook for its folder; tabs of pwsh 7 come back in t
 
 <details><summary>How do I uninstall?</summary>
 
-About → **Remove data and autostart**, then delete the exe.
+Settings → **Uninstall**, or Windows Settings → Apps → Lazarus → Uninstall. You choose whether settings, the journal and logs go too.
+Without installing: About → **Remove data and autostart**, then delete the exe.
 </details>
 
 ## Privacy
