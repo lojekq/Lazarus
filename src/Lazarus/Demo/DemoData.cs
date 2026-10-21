@@ -24,6 +24,9 @@ public static class DemoData
             new() { ClosedAt = now.AddMinutes(-2), Kind = EntryKind.Terminal, Title = "pingwhen", Exe = @"C:\Program Files\WindowsApps\Microsoft.WindowsTerminal\WindowsTerminal.exe",
                 Tabs = [new("pwsh.exe", Pwsh, @"D:\Projects\pingwhen"), new("pwsh.exe", Pwsh, @"D:\Projects\MLink"), new("cmd.exe", Cmd, @"C:\Users\demo")],
                 Placement = P(3448, 8, 4872, 1272), Monitor = "DISPLAY2" },
+            new() { ClosedAt = now.AddMinutes(-5), Kind = EntryKind.Explorer, Title = "src", Exe = @"C:\Windows\explorer.exe",
+                Paths = [@"D:\Projects\pingwhen\src"], Active = @"D:\Projects\pingwhen\src", TabOf = 0x10A2B4,
+                Placement = P(1720, 0, 3440, 1408), Monitor = "DISPLAY1" },
             new() { ClosedAt = now.AddMinutes(-7), Kind = EntryKind.App, Title = "vram-bouncer - Visual Studio Code", Exe = @"C:\Users\demo\AppData\Local\Programs\Microsoft VS Code\Code.exe",
                 CommandLine = @"""C:\Users\demo\AppData\Local\Programs\Microsoft VS Code\Code.exe"" D:\Projects\vram-bouncer", WorkDir = @"C:\Users\demo\AppData\Local\Programs\Microsoft VS Code",
                 Placement = P(0, 0, 1720, 1408, 3), Monitor = "DISPLAY1" },
@@ -32,19 +35,26 @@ public static class DemoData
                 Placement = P(3500, 1300, 4800, 2400), Monitor = "DISPLAY2" },
             new() { ClosedAt = now.AddMinutes(-24), Kind = EntryKind.Packaged, Title = Loc.T("Demo.Notepad"), Exe = @"C:\Program Files\WindowsApps\Microsoft.WindowsNotepad\Notepad\Notepad.exe",
                 Aumid = "Microsoft.WindowsNotepad_8wekyb3d8bbwe!App", Placement = P(900, 300, 2100, 1100), Monitor = "DISPLAY1" },
-            new() { ClosedAt = now.AddMinutes(-41), Kind = EntryKind.App, Title = "Blender", Exe = @"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe",
-                CommandLine = @"""C:\Program Files\Blender Foundation\Blender 4.5\blender.exe""", WorkDir = @"C:\Program Files\Blender Foundation\Blender 4.5",
-                Placement = P(0, 0, 3440, 1408, 3), Monitor = "DISPLAY1" },
+            new() { ClosedAt = now.AddMinutes(-41), Kind = EntryKind.Group, Items = // Explorer restarted: three windows at once
+            [
+                Folder("MLink", @"D:\Projects\MLink", now.AddMinutes(-41)),
+                Folder("2026", @"D:\Photos\2026", now.AddMinutes(-41).AddSeconds(-0.4)),
+                Folder(Loc.T("Demo.Downloads"), @"C:\Users\demo\Downloads", now.AddMinutes(-41).AddSeconds(-0.8)),
+            ] },
             new() { ClosedAt = now.AddMinutes(-58), Kind = EntryKind.Console, Title = Loc.T("Demo.Admin"), Exe = @"C:\Windows\System32\cmd.exe",
                 CommandLine = @"""C:\Windows\System32\cmd.exe""", WorkDir = @"C:\Windows\System32", Elevated = true,
                 Placement = P(200, 200, 1400, 900), Monitor = "DISPLAY1" },
             new() { ClosedAt = now.AddMinutes(-85), Kind = EntryKind.Console, Title = "python train.py", Exe = @"C:\Users\demo\AppData\Local\Programs\Python\Python313\python.exe",
                 CommandLine = "python train.py --epochs 20", WorkDir = @"D:\ml\llm-tune",
                 Placement = P(3460, 100, 4700, 900), Monitor = "DISPLAY2" },
-            new() { ClosedAt = now.AddMinutes(-118), Kind = EntryKind.Explorer, Title = Loc.T("Demo.Downloads"), Exe = @"C:\Windows\explorer.exe",
-                Paths = [@"C:\Users\demo\Downloads"], Active = @"C:\Users\demo\Downloads", Placement = P(600, 200, 1900, 1000), Monitor = "DISPLAY1" },
         ];
         foreach (var e in entries.Reverse()) j.Push(e);
+
+        Entry Folder(string title, string path, DateTimeOffset at) => new()
+        {
+            ClosedAt = at, Kind = EntryKind.Explorer, Title = title, Exe = @"C:\Windows\explorer.exe", Paths = [path], Active = path,
+            Placement = P(600, 200, 1900, 1000), Monitor = "DISPLAY1",
+        };
     }
 
     /// <summary>The python entry, for the confirmation dialog screenshot.</summary>

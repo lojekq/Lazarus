@@ -156,6 +156,13 @@ public sealed class WindowTracker(Journal journal)
                     Proc = Get(w.Pid, table.TryGetValue(w.Pid, out var t) ? t.Name : null),
                 };
             win.HiddenSince = null;
+            if (win.CloakedAtFirst && !w.Cloaked)
+            {
+                // Cloaked when first seen, shown now: a suspended UWP frame reused by its app, a window from another desktop.
+                // From here on it is a new window like any other.
+                win.CloakedAtFirst = false;
+                win.FirstSeen = now;
+            }
             if (!win.Proc.Excluded) Update(win, w.Title, displays, now, paused);
         }
 
@@ -357,7 +364,7 @@ public sealed class WindowTracker(Journal journal)
         public required nint Hwnd;
         public required int Pid;
         public required string Class;
-        public required DateTime FirstSeen;
+        public required DateTime FirstSeen;   // reset when a window cloaked at first sight shows up
         public required bool CloakedAtFirst;
         public required Proc Proc;
         public Proc? AppProc;                  // UWP: the app behind ApplicationFrameHost

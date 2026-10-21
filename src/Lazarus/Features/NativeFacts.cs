@@ -42,5 +42,16 @@ public static class NativeFacts
     // Checked end to end (2026-10-21): `explorer.exe "<path>"` opens paths with spaces, Cyrillic, #, comma, % and ; and a quoted
     // ::{CLSID}; SetWindowPlacement puts a maximized Explorer back on DISPLAY2; WT -p {GUID} -d restores pwsh (hook), cmd (after cd).
 
-    // Not checked: the AUMID of an ApplicationFrameHost (UWP) window through its CoreWindow child; no UWP window was open.
+    // A UWP window (ApplicationFrameWindow of ApplicationFrameHost.exe): the app's process owns the Windows.UI.Core.CoreWindow child,
+    // GetApplicationUserModelId on it gives the AUMID, ActivateApplication brings it back (Settings, checked live). A suspended app
+    // keeps its frame cloaked and shows the same frame again on the next start.
+
+    // Explorer's "new tab": WM_COMMAND 0xA21B posted to a ShellTabWindowClass window (or to the CabinetWClass window) opens a tab
+    // at the user's start folder; IShellBrowser.BrowseObject(pidl, SBSP_SAMEBROWSER) on that tab then goes to any path (undocumented
+    // command, checked on 26300; if it stops working, the tabs open as windows).
+
+    // Default-terminal handoff (console started outside WT, "Let Windows decide" → WT): the shell's parent is whoever started it, not
+    // OpenConsole.exe (that one is started by svchost for COM), there is no WT_SESSION, and NtQueryInformationProcess class 49
+    // (ProcessConsoleHostProcess, works with QUERY_LIMITED) names a plain conhost.exe, like a hidden console of any program.
+    // So such a tab can't be told from other consoles: v1.0 does not restore handoff tabs (spec 03 §3 assumed the OpenConsole parent).
 }

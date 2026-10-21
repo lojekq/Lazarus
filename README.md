@@ -27,8 +27,9 @@ Browsers have Ctrl+Shift+T for that; Windows does not. Lazarus adds it: one key 
 ## Features
 
 - **One key** — `Ctrl+Shift+Win+T` brings back the last closed window, each next press the one before it. `Ctrl+Shift+T` works too while Explorer, the desktop or the taskbar is in front.
-- **Explorer folders** — the same path, special folders like This PC included, on the same spot of the same monitor; the other tabs of the window are one click away.
+- **Explorer windows with their tabs** — the same folders, special ones like This PC included, as tabs of one window on the same spot of the same monitor. A single closed tab goes back into its window.
 - **Windows Terminal with all its tabs** — every tab comes back with its profile and working folder.
+- **Everything at once** — when Explorer restarts or three windows close within two seconds, one press brings them all back.
 - **Apps in place** — programs return to the same monitor, size and position, even those that don't remember it themselves.
 - **Safe** — commands typed in a terminal are never run again, and anything risky (console commands, admin windows, links or tokens in arguments) asks first.
 - **Local** — no admin rights, no telemetry; the journal stays in `%APPDATA%\Lazarus`.
@@ -115,6 +116,7 @@ The global hotkey has three modifiers, and `Ctrl+Shift+T` only works with Explor
 
 A window that ran as administrator comes back only after you confirm, through the UAC prompt, and Windows does not let Lazarus move it.
 A WSL tab opens in its profile's folder (a Linux path is out of reach from Windows). Windows open on the current virtual desktop.
+A Terminal tab that a console program opened by itself (started outside Terminal and handed over to it) can't be told apart from other consoles and is not remembered.
 Windows PowerShell 5.1 has no hook for its folder; tabs of pwsh 7 come back in the right one.
 </details>
 

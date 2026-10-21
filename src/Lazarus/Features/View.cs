@@ -74,12 +74,16 @@ public static class View
         untilUtc == DateTime.MaxValue ? Loc.T("Journal.PausedRestart") : string.Format(Loc.T("Journal.Paused"), untilUtc.ToLocalTime().ToString("HH:mm"));
 
     /// <summary>The program's own icon; null → a glyph by kind (always in --demo, so pictures don't depend on what is installed).</summary>
-    public static ImageSource? Icon(Entry e) =>
-        Args.Current.Demo || e.Kind is EntryKind.Explorer or EntryKind.Terminal or EntryKind.Group ? null : ExeIcon.Get(e.Exe);
+    public static ImageSource? Icon(Entry e) => Args.Current.Demo ? null : e.Kind switch
+    {
+        EntryKind.Explorer or EntryKind.Group => null,
+        EntryKind.Terminal or EntryKind.Packaged => PackageIcon.Get(e.Exe, e.Aumid), // the exe's own icon is a placeholder (v1.0)
+        _ => ExeIcon.Get(e.Exe),
+    };
 
     public static SymbolRegular Glyph(Entry e) => e.Kind switch
     {
-        EntryKind.Explorer when e.TabOf is not null => SymbolRegular.Tab24,
+        EntryKind.Explorer when e.TabOf is not null => SymbolRegular.TabDesktop24,
         EntryKind.Explorer => SymbolRegular.Folder24,
         EntryKind.Group => SymbolRegular.WindowMultiple20,
         EntryKind.Terminal or EntryKind.Console => SymbolRegular.WindowConsole20,
