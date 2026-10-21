@@ -148,7 +148,7 @@ public static partial class RiskClassifier
 {
     public const string Console = "console", Admin = "admin", Link = "link", Token = "token", Location = "location";
 
-    public static List<string> Reasons(Entry e, IEnumerable<string> trusted, string temp, string? downloads)
+    public static List<string> Reasons(Entry e, IEnumerable<string> trusted, IEnumerable<string> temp, string? downloads)
     {
         var r = new List<string>();
         if (e.Elevated) r.Add(Admin); // always asks, trusted or not
@@ -157,7 +157,7 @@ public static partial class RiskClassifier
         var args = e.CommandLine is null ? [] : CmdLine.Args(CmdLine.SplitExe(e.CommandLine).RawArgs);
         if (args.Any(a => a.Contains("://"))) r.Add(Link);
         if (args.Any(LooksLikeSecret)) r.Add(Token);
-        if (Paths.IsUnder(temp, e.Exe) || downloads is not null && Paths.IsUnder(downloads, e.Exe)) r.Add(Location);
+        if (temp.Any(t => Paths.IsUnder(t, e.Exe)) || downloads is not null && Paths.IsUnder(downloads, e.Exe)) r.Add(Location);
         return r;
     }
 

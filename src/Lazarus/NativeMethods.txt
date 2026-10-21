@@ -60,3 +60,4 @@ SetWindowPos
 PostMessage
 keybd_event
 SetForegroundWindow
+GetLongPathName

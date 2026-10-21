@@ -13,12 +13,26 @@ public static class WindowFilter
     public static readonly TimeSpan MinAge = TimeSpan.FromSeconds(3);
 
     /// <summary>
-    /// Always excluded: installers, %TEMP%, games (any Steam library, Epic), shell hosts. A pattern without "\" matches the exe
+    /// %TEMP%, %TMP% and GetTempPath as long paths: they are often 8.3 names (C:\Users\RUNNER~1\…), while exe paths are long.
+    /// </summary>
+    public static readonly string[] TempDirs = new[] { Path.GetTempPath(), Environment.GetEnvironmentVariable("TEMP"), Environment.GetEnvironmentVariable("TMP") }
+        .OfType<string>().Where(d => d.Length > 0).Select(d => LongPath(Path.GetFullPath(d)).TrimEnd('\\'))
+        .Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+
+    static string LongPath(string path)
+    {
+        Span<char> buf = stackalloc char[1024];
+        var n = Windows.Win32.PInvoke.GetLongPathName(path, buf);
+        return n > 0 && n < buf.Length ? buf[..(int)n].ToString() : path;
+    }
+
+    /// <summary>
+    /// Always excluded: installers, the temp folders, games (any Steam library, Epic), shell hosts. A pattern without "\" matches the exe
     /// file name, with "\" the full path; * and ? work, %VARS% expand.
     /// </summary>
     public static readonly string[] BuiltIn =
     [
-        "msiexec.exe", "unins*.exe", "*setup*.exe", "*install*.exe", @"%TEMP%\*",
+        "msiexec.exe", "unins*.exe", "*setup*.exe", "*install*.exe", .. TempDirs.Select(d => Path.Combine(d, "*")),
         @"*\steamapps\common\*", @"*\Epic Games\*",
         "ShellExperienceHost.exe", "StartMenuExperienceHost.exe", "SearchHost.exe", "SearchApp.exe", "TextInputHost.exe",
         "LockApp.exe", "ShellHost.exe", "PickerHost.exe", "rundll32.exe", "consent.exe",

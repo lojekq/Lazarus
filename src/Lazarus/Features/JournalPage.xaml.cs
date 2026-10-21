@@ -92,7 +92,7 @@ public partial class JournalPage
         var downloads = Engine.DownloadsFolder;
         var selected = Selected?.Entry.Id;
         var items = Engine.Journal.Entries
-            .Select(e => new EntryView(e, now, RiskClassifier.Reasons(e, Settings.Current.TrustedExes, Path.GetTempPath(), downloads)))
+            .Select(e => new EntryView(e, now, RiskClassifier.Reasons(e, Settings.Current.TrustedExes, WindowFilter.TempDirs, downloads)))
             .Where(v => v.Matches(q)).ToList();
         List.ItemsSource = items;
         List.SelectedItem = items.FirstOrDefault(v => v.Entry.Id == selected);

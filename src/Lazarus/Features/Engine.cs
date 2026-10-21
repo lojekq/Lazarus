@@ -133,7 +133,7 @@ public static class Engine
                 return;
             }
 
-            var reasons = RiskClassifier.Reasons(e, Settings.Current.TrustedExes, Path.GetTempPath(), DownloadsFolder);
+            var reasons = RiskClassifier.Reasons(e, Settings.Current.TrustedExes, WindowFilter.TempDirs, DownloadsFolder);
             if (reasons.Count > 0 && !await Application.Current.Dispatcher.InvokeAsync(() => ConfirmDialog.Ask(e, reasons)))
             {
                 Journal.Push(e);

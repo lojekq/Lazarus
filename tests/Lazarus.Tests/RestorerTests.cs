@@ -37,7 +37,7 @@ public class RestorerTests
     static Entry App(string cmd, EntryKind kind = EntryKind.App, bool elevated = false, string exe = @"C:\Apps\tool.exe") =>
         new() { Kind = kind, Exe = exe, CommandLine = cmd, Elevated = elevated };
 
-    static List<string> Reasons(Entry e, params string[] trusted) => RiskClassifier.Reasons(e, trusted, @"C:\Users\demo\AppData\Local\Temp", @"C:\Users\demo\Downloads");
+    static List<string> Reasons(Entry e, params string[] trusted) => RiskClassifier.Reasons(e, trusted, [@"C:\Users\demo\AppData\Local\Temp"], @"C:\Users\demo\Downloads");
 
     [TestMethod]
     public void RiskClassifierRules()
