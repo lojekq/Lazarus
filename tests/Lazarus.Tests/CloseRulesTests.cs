@@ -33,6 +33,11 @@ public class CloseRulesTests
         Assert.IsTrue(Features.WindowFilter.IsExcluded(@"C:\Program Files\App\unins000.exe", p));
         Assert.IsTrue(Features.WindowFilter.IsExcluded(Path.Combine(Features.WindowFilter.TempDirs[0], @"abc\tool.exe"), p), "exe paths are long, %TEMP% may be 8.3");
         Assert.IsFalse(Features.WindowFilter.IsExcluded(@"C:\Program Files\obs-studio\bin\64bit\obs64.exe", p));
+        Assert.IsTrue(Features.WindowFilter.IsExcluded(@"C:\Users\demo\Downloads\Lazarus.exe", p), "the installer's dialog is not a closed program");
+#if DEBUG
+        Assert.IsTrue(Features.WindowFilter.IsExcluded(@"C:\Program Files\dotnet\dotnet.exe", p), "Debug: the other sessions' builds and tests");
+        Assert.IsTrue(Features.WindowFilter.IsExcluded(@"C:\Users\demo\AppData\Local\AnthropicClaude\Claude.exe", p));
+#endif
         Assert.IsTrue(Features.WindowFilter.IsExcluded(@"C:\Program Files\obs-studio\bin\64bit\obs64.exe", [@"*\obs-studio\*"]));
         Assert.IsFalse(Features.WindowFilter.IsExcluded(@"C:\steamapps\x.exe", [@"*\steamapps\common\*"]));
     }

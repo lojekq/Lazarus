@@ -1,6 +1,7 @@
 using System.Drawing;
 using System.IO;
 using System.IO.Enumeration;
+using Lazarus.Shell;
 
 namespace Lazarus.Features;
 
@@ -36,6 +37,7 @@ public static class WindowFilter
         @"*\steamapps\common\*", @"*\Epic Games\*",
         "ShellExperienceHost.exe", "StartMenuExperienceHost.exe", "SearchHost.exe", "SearchApp.exe", "TextInputHost.exe",
         "LockApp.exe", "ShellHost.exe", "PickerHost.exe", "rundll32.exe", "consent.exe",
+        AppInfo.Name + ".exe", // another Lazarus: the installer's dialog, an old version during an update (our own process is skipped anyway)
         .. DebugExclusions(),
     ];
 
@@ -49,7 +51,7 @@ public static class WindowFilter
         var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\..\..\.."));
         return
         [
-            "PingWhen.exe", "VramBouncer.exe", "Lazarus.exe", "EdgeTuck.exe", "Sidechain.exe", "ChangeLedger.exe", "Reclaimer.exe",
+            "PingWhen.exe", "VramBouncer.exe", "EdgeTuck.exe", "Sidechain.exe", "ChangeLedger.exe", "Reclaimer.exe",
             "DownloadsLifecycle.exe", "dotnet.exe", "testhost.exe", "Claude.exe", Path.Combine(root, "*"),
         ];
 #else
