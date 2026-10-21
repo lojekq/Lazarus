@@ -42,3 +42,17 @@ CoTaskMemFree
 WINEVENT_OUTOFCONTEXT
 WINEVENT_SKIPOWNPROCESS
 UNICODE_STRING
+// Lazarus
+ReadProcessMemory
+IsWow64Process
+GetWindowPlacement
+SetWindowPlacement
+IsWindow
+GetWindowRect
+GetAncestor
+FindWindowEx
+GetForegroundWindow
+GetApplicationUserModelId
+SHGetNameFromIDList
+IApplicationActivationManager
+ApplicationActivationManager
