@@ -3,14 +3,14 @@
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
                  xmlns:l="clr-namespace:Lazarus.Shell"
-                 Title="{x:Static l:AppInfo.DisplayName}" Width="620" SizeToContent="Height" ResizeMode="NoResize"
+                 Title="{x:Static l:AppInfo.Title}" Width="620" SizeToContent="Height" ResizeMode="NoResize"
                  WindowStartupLocation="CenterScreen" ExtendsContentIntoTitleBar="True" WindowBackdropType="Mica" Topmost="True">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <ui:TitleBar Title="{x:Static l:AppInfo.DisplayName}" ShowMaximize="False" ShowMinimize="False">
+        <ui:TitleBar Title="{x:Static l:AppInfo.Title}" ShowMaximize="False" ShowMinimize="False">
             <ui:TitleBar.Icon>
                 <ui:ImageIcon Source="pack://application:,,,/Assets/app.ico" />
             </ui:TitleBar.Icon>

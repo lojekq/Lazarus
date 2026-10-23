@@ -33,7 +33,7 @@ public partial class App : Application
         // out of the profiles (the only thing Lazarus writes outside its data folder); services start below the installer
         RemoveData = () =>
         {
-            if (!Args.Current.Demo) PowerShellHook.DisconnectAll();
+            if (!Args.Current.Demo && !AppInfo.IsDev) PowerShellHook.DisconnectAll(); // a dev instance never touches the real profiles
             return null;
         };
         if (await Installer.HandleAsync()) // install, update, switch to the installed copy or uninstall: this process is done

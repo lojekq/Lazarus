@@ -117,6 +117,7 @@ public partial class SettingsSection
         PwshStatus.Text = Loc.T("Set.Pwsh.Checking");
         ConnectButton.IsEnabled = DisconnectButton.IsEnabled = false;
         var hosts = await PowerShellHook.FindAsync();
+        var dev = AppInfo.IsDev; // a Debug build or a --data-dir check run: the profiles are the owner's real ones, read only
         var (connected, running) = await Task.Run(() => (
             hosts.Select(h => PowerShellHook.IsConnected(h.Profile)).ToList(),
             // Shells running the hook: LAZARUS_HOOK (or the 1.0 one-liner's LAZARUS_CWD) in their environment
@@ -127,14 +128,14 @@ public partial class SettingsSection
             .Append(string.Format(Loc.T("Set.Pwsh.Running"), running)));
         PwshPolicy.Text = Loc.T("Set.Pwsh.PolicyNote");
         PwshPolicy.Visibility = hosts.Any(h => h.PolicyBlocks) ? Visibility.Visible : Visibility.Collapsed;
-        ConnectButton.IsEnabled = hosts.Where((h, i) => !h.PolicyBlocks && !connected[i]).Any();
-        DisconnectButton.IsEnabled = connected.Any(c => c);
+        ConnectButton.IsEnabled = !dev && hosts.Where((h, i) => !h.PolicyBlocks && !connected[i]).Any();
+        DisconnectButton.IsEnabled = !dev && connected.Any(c => c);
     }
 
     /// <summary>Connect writes the block into each PowerShell whose policy loads profiles; Disconnect takes it out of all of them.</summary>
     async Task ChangeHook(bool connect)
     {
-        if (Args.Current.Demo) return;
+        if (Args.Current.Demo || AppInfo.IsDev) return;
         ConnectButton.IsEnabled = DisconnectButton.IsEnabled = false;
         var hosts = await PowerShellHook.FindAsync();
         var error = await Task.Run(() =>
