@@ -70,6 +70,7 @@ public partial class App : Application
         Capture.Attach(window, () => { if (a.Autoplay && a.Demo) Autoplay.Start(window); });
 
         if (a.Screenshot is null) Tray.Create(ShowMain, () => Quit(), Engine.TrayItems());
+        if (Migration.Message is { } moved) Tray.Notify(AppInfo.DisplayName, moved); // Lazarus → Second Wind, once
         SessionEnding += (_, _) => RaiseExiting();
         Updates.Found += (version, url) =>
         {

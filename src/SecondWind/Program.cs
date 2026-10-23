@@ -1,4 +1,5 @@
 using System.IO;
+using SecondWind.Features;
 using SecondWind.Shell;
 
 namespace SecondWind;
@@ -33,6 +34,11 @@ public static class Program
         // is undone at its first await, and everything created later (Loaded, timers, BeginInvoke) spoke the Windows language
         Settings.Load();
         Loc.Apply(Settings.Current.Language);
+        if (Migration.AtStart()) // Lazarus' settings came over: they are the settings now
+        {
+            Settings.Load();
+            Loc.Apply(Settings.Current.Language);
+        }
         var app = new App();
         app.InitializeComponent();
         return app.Run();

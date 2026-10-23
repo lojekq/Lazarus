@@ -161,4 +161,9 @@ The program, its Start menu shortcut, autostart and the entry in Settings → Ap
   <data name="Set.Pwsh.Blocked" xml:space="preserve"><value>profiles are off (execution policy {0})</value></data>
   <data name="Set.Pwsh.Running" xml:space="preserve"><value>open windows with it: {0}</value></data>
   <data name="Set.Pwsh.PolicyNote" xml:space="preserve"><value>A PowerShell whose execution policy is Restricted or AllSigned does not load profiles, so Second Wind leaves it alone. To allow your own profile, run in it: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned. Second Wind never changes the policy.</value></data>
+  <data name="Migrate.Close" xml:space="preserve"><value>Lazarus, the old version of {0}, is still running. Close it in the tray (right-click its icon → Exit), then press OK. Cancel moves your settings and journal over later.</value></data>
+  <data name="Migrate.Postponed" xml:space="preserve"><value>Lazarus is still running, so its settings and journal stay where they are for now. {0} will move them on its next start.</value></data>
+  <data name="Migrate.Failed" xml:space="preserve"><value>Settings and the journal could not be moved over from Lazarus ({1}). Lazarus is left as it was; {0} will try again on its next start.</value></data>
+  <data name="Migrate.Done" xml:space="preserve"><value>Moved over from Lazarus: settings and the journal ({0} entries). Its old data folder is kept as Lazarus.migrated-&lt;date&gt;.</value></data>
+  <data name="Migrate.Left" xml:space="preserve"><value>Remove by hand: {0}.</value></data>
 </root>

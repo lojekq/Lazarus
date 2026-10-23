@@ -161,4 +161,9 @@
   <data name="Set.Pwsh.Blocked" xml:space="preserve"><value>профили выключены (политика выполнения {0})</value></data>
   <data name="Set.Pwsh.Running" xml:space="preserve"><value>открытых окон с ним: {0}</value></data>
   <data name="Set.Pwsh.PolicyNote" xml:space="preserve"><value>PowerShell с политикой выполнения Restricted или AllSigned не загружает профили, поэтому Second Wind его не трогает. Чтобы разрешить свой профиль, выполните в нём: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned. Сам Second Wind политику не меняет.</value></data>
+  <data name="Migrate.Close" xml:space="preserve"><value>Lazarus — старая версия {0} — ещё работает. Закройте его в трее (правый клик по значку → «Выход»), затем нажмите OK. «Отмена» — перенести настройки и журнал позже.</value></data>
+  <data name="Migrate.Postponed" xml:space="preserve"><value>Lazarus ещё работает, поэтому его настройки и журнал пока остаются на месте. {0} перенесёт их при следующем запуске.</value></data>
+  <data name="Migrate.Failed" xml:space="preserve"><value>Не удалось перенести настройки и журнал из Lazarus ({1}). Lazarus оставлен как был; {0} попробует снова при следующем запуске.</value></data>
+  <data name="Migrate.Done" xml:space="preserve"><value>Перенесено из Lazarus: настройки и журнал (записей: {0}). Старая папка данных сохранена как Lazarus.migrated-&lt;дата&gt;.</value></data>
+  <data name="Migrate.Left" xml:space="preserve"><value>Удалите вручную: {0}.</value></data>
 </root>
