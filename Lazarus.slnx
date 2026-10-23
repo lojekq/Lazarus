@@ -1,8 +1,0 @@
-<Solution>
-  <Folder Name="/src/">
-    <Project Path="src/Lazarus/Lazarus.csproj" />
-  </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/Lazarus.Tests/Lazarus.Tests.csproj" />
-  </Folder>
-</Solution>

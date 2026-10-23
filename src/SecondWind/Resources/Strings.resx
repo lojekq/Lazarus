@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Tray.Open" xml:space="preserve"><value>Open journal</value></data>
+  <data name="Tray.Exit" xml:space="preserve"><value>Exit</value></data>
+  <data name="Tray.Hidden" xml:space="preserve"><value>Still running in the notification area. To quit, right-click the icon and choose Exit.</value></data>
+  <data name="Page.Main" xml:space="preserve"><value>Journal</value></data>
+  <data name="Page.Settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="Page.About" xml:space="preserve"><value>About</value></data>
+  <data name="Settings.Language" xml:space="preserve"><value>Language</value></data>
+  <data name="Settings.Restart" xml:space="preserve"><value>Restart to apply</value></data>
+  <data name="Settings.System" xml:space="preserve"><value>Use system setting</value></data>
+  <data name="Settings.Theme" xml:space="preserve"><value>Theme</value></data>
+  <data name="Settings.Light" xml:space="preserve"><value>Light</value></data>
+  <data name="Settings.Dark" xml:space="preserve"><value>Dark</value></data>
+  <data name="Settings.Autostart" xml:space="preserve"><value>Start with Windows</value></data>
+  <data name="Settings.Autostart.DisabledByUser" xml:space="preserve"><value>Turned off in Task Manager → Startup apps. Turn it on there.</value></data>
+  <data name="Settings.StartMenu" xml:space="preserve"><value>Start menu shortcut</value></data>
+  <data name="Settings.Updates" xml:space="preserve"><value>Check for updates</value></data>
+  <data name="Settings.Updates.Note" xml:space="preserve"><value>Once a day asks GitHub about a new release. Nothing is downloaded.</value></data>
+  <data name="About.Version" xml:space="preserve"><value>Version</value></data>
+  <data name="About.Links" xml:space="preserve"><value>Links</value></data>
+  <data name="About.Issues" xml:space="preserve"><value>Report a problem</value></data>
+  <data name="About.DataFolder" xml:space="preserve"><value>Settings and logs</value></data>
+  <data name="About.OpenDataFolder" xml:space="preserve"><value>Open folder</value></data>
+  <data name="About.Remove" xml:space="preserve"><value>Remove data and autostart</value></data>
+  <data name="About.Remove.Note" xml:space="preserve"><value>Deletes settings, logs, autostart and the Start menu shortcut, then exits. Delete the exe yourself.</value></data>
+  <data name="About.Remove.Button" xml:space="preserve"><value>Remove</value></data>
+  <data name="About.Remove.Confirm" xml:space="preserve"><value>Delete settings, logs, autostart and the shortcut, and exit?</value></data>
+  <data name="Update.Title" xml:space="preserve"><value>Update available</value></data>
+  <data name="Update.Message" xml:space="preserve"><value>Version {0} is available.</value></data>
+  <data name="Update.Open" xml:space="preserve"><value>Release page</value></data>
+  <data name="Elevated.Title" xml:space="preserve"><value>Running as administrator</value></data>
+  <data name="Elevated.Message" xml:space="preserve"><value>Programs that Second Wind restores will run as administrator too. Restart Second Wind the usual way.</value></data>
+  <data name="Crash.Message" xml:space="preserve"><value>{0} has crashed and closed.
+
+Crash log: {1}
+
+Open the folder?</value></data>
+  <data name="Install.Ask" xml:space="preserve"><value>Install {0}?
+
+It will be copied to {1} and get a Start menu shortcut and an entry in Settings → Apps. No administrator rights needed.</value></data>
+  <data name="Install.Button" xml:space="preserve"><value>Install</value></data>
+  <data name="Install.NoInstall" xml:space="preserve"><value>Run without installing</value></data>
+  <data name="Install.Update" xml:space="preserve"><value>Update {0} {1} → {2}?
+
+The running copy closes and starts again.</value></data>
+  <data name="Install.UpdateButton" xml:space="preserve"><value>Update</value></data>
+  <data name="Install.CloseRunning" xml:space="preserve"><value>{0} is still running. Close it in the tray: right-click the icon → Exit, then press Retry.</value></data>
+  <data name="Install.Retry" xml:space="preserve"><value>Retry</value></data>
+  <data name="Install.Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Uninstall.Ask" xml:space="preserve"><value>Uninstall {0}?
+
+The program, its Start menu shortcut, autostart and the entry in Settings → Apps will be removed.</value></data>
+  <data name="Uninstall.Data" xml:space="preserve"><value>Also delete settings, the journal and logs</value></data>
+  <data name="Uninstall.Button" xml:space="preserve"><value>Uninstall</value></data>
+  <data name="Uninstall.Done" xml:space="preserve"><value>{0} is uninstalled.</value></data>
+  <data name="Uninstall.Leftover" xml:space="preserve"><value>Some files are in use and stayed in {0}. Delete the folder later.</value></data>
+  <data name="Settings.Install" xml:space="preserve"><value>Installation</value></data>
+  <data name="Settings.Installed" xml:space="preserve"><value>Installed in {0}</value></data>
+  <data name="Settings.NotInstalled" xml:space="preserve"><value>Runs without installing, from {0}</value></data>
+  <data name="Hotkey.Placeholder" xml:space="preserve"><value>Press a key combination</value></data>
+  <data name="Hotkey.Busy" xml:space="preserve"><value>Taken by another program</value></data>
+  <data name="Hotkey.Failed" xml:space="preserve"><value>Could not register</value></data>
+  <data name="Tray.RestoreLast" xml:space="preserve"><value>Restore last ({0})</value></data>
+  <data name="Tray.Recent" xml:space="preserve"><value>Recently closed</value></data>
+  <data name="Tray.RecentEmpty" xml:space="preserve"><value>Nothing closed yet</value></data>
+  <data name="Tray.Pause" xml:space="preserve"><value>Pause</value></data>
+  <data name="Tray.Pause15" xml:space="preserve"><value>15 minutes</value></data>
+  <data name="Tray.Pause60" xml:space="preserve"><value>1 hour</value></data>
+  <data name="Tray.PauseRestart" xml:space="preserve"><value>Until restart</value></data>
+  <data name="Tray.Resume" xml:space="preserve"><value>Resume</value></data>
+  <data name="Tray.Settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="Journal.Search" xml:space="preserve"><value>Search by title, path or program</value></data>
+  <data name="Journal.RestoreLast" xml:space="preserve"><value>Restore last</value></data>
+  <data name="Journal.Watching.One" xml:space="preserve"><value>Watching {0} window</value></data>
+  <data name="Journal.Watching.Few" xml:space="preserve"><value>Watching {0} windows</value></data>
+  <data name="Journal.Watching.Many" xml:space="preserve"><value>Watching {0} windows</value></data>
+  <data name="Journal.Paused" xml:space="preserve"><value>Paused until {0}</value></data>
+  <data name="Journal.PausedRestart" xml:space="preserve"><value>Paused until restart</value></data>
+  <data name="Journal.ExplorerHung" xml:space="preserve"><value>Explorer is not responding</value></data>
+  <data name="Journal.Empty" xml:space="preserve"><value>Nothing closed yet. Close a window and press {0}.</value></data>
+  <data name="Tabs.One" xml:space="preserve"><value>+{0} tab</value></data>
+  <data name="Tabs.Few" xml:space="preserve"><value>+{0} tabs</value></data>
+  <data name="Tabs.Many" xml:space="preserve"><value>+{0} tabs</value></data>
+  <data name="TermTabs.One" xml:space="preserve"><value>{0} tab</value></data>
+  <data name="TermTabs.Few" xml:space="preserve"><value>{0} tabs</value></data>
+  <data name="TermTabs.Many" xml:space="preserve"><value>{0} tabs</value></data>
+  <data name="Time.Now" xml:space="preserve"><value>just now</value></data>
+  <data name="Time.Min" xml:space="preserve"><value>{0} min ago</value></data>
+  <data name="Time.Hours" xml:space="preserve"><value>{0} h ago</value></data>
+  <data name="Time.Yesterday" xml:space="preserve"><value>yesterday</value></data>
+  <data name="Monitor" xml:space="preserve"><value>Monitor {0}</value></data>
+  <data name="Badge.Admin" xml:space="preserve"><value>admin</value></data>
+  <data name="Badge.Confirm" xml:space="preserve"><value>asks first</value></data>
+  <data name="Badge.Unavailable" xml:space="preserve"><value>unavailable</value></data>
+  <data name="Menu.Restore" xml:space="preserve"><value>Restore</value></data>
+  <data name="Menu.OpenAll" xml:space="preserve"><value>Open all tabs</value></data>
+  <data name="Menu.CopyCommand" xml:space="preserve"><value>Copy command</value></data>
+  <data name="Menu.OpenFolder" xml:space="preserve"><value>Open program folder</value></data>
+  <data name="Menu.Exclude" xml:space="preserve"><value>Don't remember this program</value></data>
+  <data name="Menu.Delete" xml:space="preserve"><value>Delete</value></data>
+  <data name="Kind.Explorer" xml:space="preserve"><value>Explorer</value></data>
+  <data name="Toast.Restored" xml:space="preserve"><value>Restored: {0}</value></data>
+  <data name="Toast.Nothing" xml:space="preserve"><value>Nothing to restore</value></data>
+  <data name="Toast.StillClosing" xml:space="preserve"><value>{0} is still closing</value></data>
+  <data name="Toast.AlreadyOpen" xml:space="preserve"><value>The program was already open: showed its window</value></data>
+  <data name="Toast.NoWindow" xml:space="preserve"><value>Started, no window found</value></data>
+  <data name="Toast.FolderUnavailable" xml:space="preserve"><value>Failed: the folder is not available</value></data>
+  <data name="Toast.ExeMissing" xml:space="preserve"><value>Failed: the program is not found</value></data>
+  <data name="Toast.Failed" xml:space="preserve"><value>Failed to start {0}</value></data>
+  <data name="Toast.Demo" xml:space="preserve"><value>Demo: nothing is started</value></data>
+  <data name="Toast.HotkeyBusy" xml:space="preserve"><value>{0} is taken by another program. Pick another one in Settings.</value></data>
+  <data name="Confirm.Title" xml:space="preserve"><value>Start this?</value></data>
+  <data name="Confirm.Program" xml:space="preserve"><value>Program</value></data>
+  <data name="Confirm.Command" xml:space="preserve"><value>Command</value></data>
+  <data name="Confirm.Folder" xml:space="preserve"><value>Folder</value></data>
+  <data name="Confirm.Why" xml:space="preserve"><value>Why it asks</value></data>
+  <data name="Reason.console" xml:space="preserve"><value>A console command: it runs again exactly as shown.</value></data>
+  <data name="Reason.admin" xml:space="preserve"><value>It ran as administrator: Windows will ask for permission, the window stays where Windows puts it.</value></data>
+  <data name="Reason.link" xml:space="preserve"><value>The arguments contain a link.</value></data>
+  <data name="Reason.token" xml:space="preserve"><value>The arguments look like a token or a password.</value></data>
+  <data name="Reason.location" xml:space="preserve"><value>The program lives in Temp or Downloads.</value></data>
+  <data name="Confirm.Trust" xml:space="preserve"><value>Don't ask again for {0}</value></data>
+  <data name="Confirm.Run" xml:space="preserve"><value>Run</value></data>
+  <data name="Confirm.Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Set.Hotkey" xml:space="preserve"><value>Restore the last closed window</value></data>
+  <data name="Set.Context" xml:space="preserve"><value>Ctrl+Shift+T in Explorer and on the desktop</value></data>
+  <data name="Set.Context.Note" xml:space="preserve"><value>Only while Explorer, the desktop or the taskbar is active: browsers keep their own Ctrl+Shift+T.</value></data>
+  <data name="Set.Journal" xml:space="preserve"><value>Journal</value></data>
+  <data name="Set.Size" xml:space="preserve"><value>Entries</value></data>
+  <data name="Set.Days" xml:space="preserve"><value>Days to keep</value></data>
+  <data name="Set.Persist" xml:space="preserve"><value>Keep the journal between restarts</value></data>
+  <data name="Set.Persist.Note" xml:space="preserve"><value>Only on this PC, in %APPDATA%\SecondWind.</value></data>
+  <data name="Set.Clear" xml:space="preserve"><value>Clear journal</value></data>
+  <data name="Set.Exclusions" xml:space="preserve"><value>Don't remember</value></data>
+  <data name="Set.Exclusions.Note" xml:space="preserve"><value>Exe names (obs64.exe) or path masks (*\Games\*). Installers, Temp, Steam and Epic games are never remembered.</value></data>
+  <data name="Set.Add" xml:space="preserve"><value>Add</value></data>
+  <data name="Set.AddFromWindows" xml:space="preserve"><value>From open windows</value></data>
+  <data name="Set.Trusted" xml:space="preserve"><value>Start without asking</value></data>
+  <data name="Set.Trusted.Empty" xml:space="preserve"><value>None yet: tick "Don't ask again" in the confirmation dialog.</value></data>
+  <data name="Set.Remove" xml:space="preserve"><value>Remove</value></data>
+  <data name="Set.Pwsh" xml:space="preserve"><value>PowerShell folder</value></data>
+  <data name="Set.Pwsh.Note" xml:space="preserve"><value>PowerShell does not tell Windows its folder, so a closed tab would come back in its start folder. Connect adds a short marked block to the end of your profile in Windows PowerShell 5.1 and PowerShell 7 (a .bak copy first): before each prompt it moves the shell to its current folder and keeps your prompt as it is. New windows pick it up; Disconnect removes only that block.</value></data>
+  <data name="Set.Pwsh.None" xml:space="preserve"><value>PowerShell is not found</value></data>
+  <data name="Demo.Notepad" xml:space="preserve"><value>notes.txt - Notepad</value></data>
+  <data name="Demo.Downloads" xml:space="preserve"><value>Downloads</value></data>
+  <data name="Demo.Admin" xml:space="preserve"><value>Administrator: C:\Windows\System32\cmd.exe</value></data>
+  <data name="Explorer.ClosedTab" xml:space="preserve"><value>closed tab</value></data>
+  <data name="Group.One" xml:space="preserve"><value>{0} window</value></data>
+  <data name="Group.Few" xml:space="preserve"><value>{0} windows</value></data>
+  <data name="Group.Many" xml:space="preserve"><value>{0} windows</value></data>
+  <data name="Set.Pwsh.Connect" xml:space="preserve"><value>Connect PowerShell</value></data>
+  <data name="Set.Pwsh.Disconnect" xml:space="preserve"><value>Disconnect</value></data>
+  <data name="Set.Pwsh.Checking" xml:space="preserve"><value>Checking PowerShell…</value></data>
+  <data name="Set.Pwsh.On" xml:space="preserve"><value>connected</value></data>
+  <data name="Set.Pwsh.Off" xml:space="preserve"><value>not connected</value></data>
+  <data name="Set.Pwsh.Blocked" xml:space="preserve"><value>profiles are off (execution policy {0})</value></data>
+  <data name="Set.Pwsh.Running" xml:space="preserve"><value>open windows with it: {0}</value></data>
+  <data name="Set.Pwsh.PolicyNote" xml:space="preserve"><value>A PowerShell whose execution policy is Restricted or AllSigned does not load profiles, so Second Wind leaves it alone. To allow your own profile, run in it: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned. Second Wind never changes the policy.</value></data>
+</root>

@@ -1,6 +1,6 @@
-# Scene GIF (spec 03 §10): Lazarus for real, not --demo, restores an Explorer window and a Windows Terminal with three tabs
+# Scene GIF (spec 03 §10): SecondWind for real, not --demo, restores an Explorer window and a Windows Terminal with three tabs
 # in the centre of DISPLAY1. Owner's slot only (00-shared §9.6): Do not disturb on, plain wallpaper, nothing personal on DISPLAY1,
-# the working Lazarus closed (it holds the mutex and the hotkeys). Run from the repo root: pwsh tools/scene.ps1 [-Lang ru]
+# the working SecondWind closed (it holds the mutex and the hotkeys). Run from the repo root: pwsh tools/scene.ps1 [-Lang ru]
 # The app closes the windows it opened ~10 s after the take, so the next take starts from the same desktop.
 param(
   [ValidateSet('en', 'ru')][string]$Lang = 'en',
@@ -10,7 +10,7 @@ param(
   [string]$Out = "docs/demo-$Lang.gif"
 )
 $ErrorActionPreference = 'Stop'; $PSNativeCommandUseErrorActionPreference = $true
-$App = 'Lazarus'
+$App = 'SecondWind'
 if (Get-Process $App -ErrorAction Ignore) { throw "close the running $App first (tray → Exit)" }
 dotnet build "src/$App" -c Release | Out-Null
 $exe = "src/$App/bin/Release/net10.0-windows/$App.exe"
