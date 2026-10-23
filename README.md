@@ -5,6 +5,8 @@
 
 **Ctrl+Shift+T for your whole desktop: bring back the folder, terminal or app you just closed, right where it was.**
 
+Formerly Lazarus.
+
 **English** · [Русский](README.ru.md)
 
 [![Release](https://img.shields.io/github/v/release/lojekq/SecondWind?sort=semver)](https://github.com/lojekq/SecondWind/releases/latest)
@@ -118,6 +120,12 @@ A window that ran as administrator comes back only after you confirm, through th
 A WSL tab opens in its profile's folder (a Linux path is out of reach from Windows). Windows open on the current virtual desktop.
 A Terminal tab that a console program opened by itself (started outside Terminal and handed over to it) can't be told apart from other consoles and is not remembered.
 PowerShell tabs, 5.1 and 7, come back in the right folder once PowerShell is connected in Settings.
+</details>
+
+<details><summary>I had Lazarus installed</summary>
+
+Lazarus is this app's old name (up to 1.0.2). Download `SecondWind.exe` (Lazarus' update notice leads to it) and run it once. The installed Second Wind takes over at its first start: it closes Lazarus (or asks you to close it from the tray), copies its settings and journal, swaps the PowerShell block in your profiles for its own (a `.bak` first), and removes Lazarus' autostart, Start menu shortcut, Apps entry and program folder. The tray then says what moved over.
+The old data is not deleted: it stays in `%APPDATA%\Lazarus.migrated-<date>`. If something didn't come over, close Second Wind, copy `settings.json` or `journal.json` from there into `%APPDATA%\SecondWind` and start it again. If PowerShell tabs lose their folder, press **Connect PowerShell** in Settings once more.
 </details>
 
 <details><summary>How do I uninstall?</summary>
